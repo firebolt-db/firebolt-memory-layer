@@ -226,6 +226,46 @@ class MetricsCollector:
 metrics = MetricsCollector()
 
 
+def log_tool_error(
+    tool_name: str,
+    error_message: str,
+    user_id: Optional[str] = None,
+    error_type: Optional[str] = None,
+    input_preview: Optional[str] = None,
+    stack_trace: Optional[str] = None
+) -> None:
+    """Log an MCP tool error for review and debugging."""
+    try:
+        from src.db.client import db
+        
+        error_id = str(uuid.uuid4())
+        
+        # Escape strings for SQL
+        def escape(s: Optional[str]) -> str:
+            if s is None:
+                return "NULL"
+            escaped = s.replace("'", "''")[:1000]  # Limit length
+            return f"'{escaped}'"
+        
+        query = f"""
+            INSERT INTO tool_error_log 
+            (error_id, tool_name, user_id, error_type, error_message, input_preview, stack_trace)
+            VALUES (
+                '{error_id}',
+                {escape(tool_name)},
+                {escape(user_id)},
+                {escape(error_type)},
+                {escape(error_message)},
+                {escape(input_preview)},
+                {escape(stack_trace)}
+            )
+        """
+        db.execute(query)
+    except Exception:
+        # Don't let error logging failures affect the main app
+        pass
+
+
 # Context manager for timing calls
 class timed_call:
     """Context manager to time and record API calls."""

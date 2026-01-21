@@ -154,3 +154,17 @@ CREATE TABLE IF NOT EXISTS memory_access_log (
     accessed_at     TIMESTAMPNTZ DEFAULT CURRENT_TIMESTAMP()
 )
 PRIMARY INDEX access_id;
+
+
+-- Tool error log for debugging and review
+CREATE TABLE IF NOT EXISTS tool_error_log (
+    error_id        TEXT NOT NULL,
+    tool_name       TEXT NOT NULL,
+    user_id         TEXT,
+    error_type      TEXT,
+    error_message   TEXT NOT NULL,
+    input_preview   TEXT,
+    stack_trace     TEXT,
+    created_at      TIMESTAMPNTZ DEFAULT CURRENT_TIMESTAMP()
+)
+PRIMARY INDEX error_id;

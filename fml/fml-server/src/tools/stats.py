@@ -204,3 +204,71 @@ def register_stats_tools(mcp):
             }
         except Exception as e:
             return {"error": str(e)}
+
+    @mcp.tool()
+    def get_recent_errors(
+        limit: int = 20,
+        tool_name: Optional[str] = None,
+    ) -> dict:
+        """
+        Get recent tool errors for debugging and review.
+
+        Args:
+            limit: Maximum number of errors to return (default: 20)
+            tool_name: Optional filter by tool name (e.g., 'store_memory')
+
+        Returns:
+            JSON with recent errors and their details
+        """
+        try:
+            # Build filter
+            filter_clause = ""
+            params = ()
+            if tool_name:
+                filter_clause = "WHERE tool_name = ?"
+                params = (tool_name,)
+
+            errors = db.execute(f"""
+                SELECT 
+                    error_id,
+                    tool_name,
+                    user_id,
+                    error_type,
+                    error_message,
+                    input_preview,
+                    created_at
+                FROM tool_error_log
+                {filter_clause}
+                ORDER BY created_at DESC
+                LIMIT ?
+            """, (*params, limit))
+
+            error_list = [
+                {
+                    "error_id": row[0][:8] + "..." if row[0] else None,
+                    "tool_name": row[1],
+                    "user_id": row[2],
+                    "error_type": row[3],
+                    "error_message": row[4][:200] + "..." if row[4] and len(row[4]) > 200 else row[4],
+                    "input_preview": row[5][:100] + "..." if row[5] and len(row[5]) > 100 else row[5],
+                    "created_at": str(row[6]) if row[6] else None,
+                }
+                for row in errors
+            ]
+
+            # Get error counts by tool
+            counts = db.execute("""
+                SELECT tool_name, COUNT(*) as cnt
+                FROM tool_error_log
+                GROUP BY tool_name
+                ORDER BY cnt DESC
+            """)
+
+            return {
+                "total_errors_returned": len(error_list),
+                "errors": error_list,
+                "errors_by_tool": {row[0]: row[1] for row in counts},
+                "filter": {"tool_name": tool_name} if tool_name else None,
+            }
+        except Exception as e:
+            return {"error": str(e), "note": "tool_error_log table may not exist"}

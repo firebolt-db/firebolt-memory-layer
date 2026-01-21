@@ -1,6 +1,7 @@
 """Long-term memory MCP tools."""
 
 import json
+import traceback
 import uuid
 from typing import List, Optional
 from mcp.server.fastmcp import FastMCP
@@ -9,6 +10,7 @@ from src.db.client import db
 from src.llm.embeddings import embedding_service
 from src.llm.ollama import ollama_service
 from src.memory.taxonomy import validate_subtype
+from src.metrics import log_tool_error
 
 
 def register_longterm_memory_tools(mcp: FastMCP):
@@ -44,6 +46,34 @@ def register_longterm_memory_tools(mcp: FastMCP):
         Returns:
             JSON with memory_id, classification, and extracted entities
         """
+        try:
+            return await _store_memory_impl(
+                user_id, content, memory_category, memory_subtype,
+                importance, entities, event_time, metadata, source_session
+            )
+        except Exception as e:
+            log_tool_error(
+                tool_name="store_memory",
+                error_message=str(e),
+                user_id=user_id,
+                error_type=type(e).__name__,
+                input_preview=content[:200] if content else None,
+                stack_trace=traceback.format_exc()
+            )
+            raise  # Re-raise so MCP returns the error to user
+
+    async def _store_memory_impl(
+        user_id: str,
+        content: str,
+        memory_category: Optional[str],
+        memory_subtype: Optional[str],
+        importance: float,
+        entities: Optional[str],
+        event_time: Optional[str],
+        metadata: Optional[str],
+        source_session: Optional[str]
+    ) -> str:
+        """Internal implementation of store_memory."""
         memory_id = str(uuid.uuid4())
 
         # Parse entities if provided as string
