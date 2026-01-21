@@ -110,7 +110,9 @@ class FireboltClient:
         if params:
             for param in params:
                 if isinstance(param, str):
-                    final_query = final_query.replace('?', f"'{param}'", 1)
+                    # Escape single quotes by doubling them (SQL standard)
+                    escaped = param.replace("'", "''")
+                    final_query = final_query.replace('?', f"'{escaped}'", 1)
                 elif param is None:
                     final_query = final_query.replace('?', 'NULL', 1)
                 elif isinstance(param, bool):
