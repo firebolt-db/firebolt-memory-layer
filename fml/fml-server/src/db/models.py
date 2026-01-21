@@ -49,7 +49,7 @@ class LongTermMemory(BaseModel):
     importance: float = 0.5
     access_count: int = 0
     decay_factor: float = 1.0
-    related_memories: List[str] = Field(default_factory=list)
+    # NOTE: related_memories removed due to Firebolt Core bug with NULL arrays
     supersedes: Optional[str] = None
     source_session: Optional[str] = None
     source_type: Optional[str] = None

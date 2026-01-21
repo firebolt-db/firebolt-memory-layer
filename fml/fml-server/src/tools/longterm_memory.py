@@ -171,7 +171,8 @@ def register_longterm_memory_tools(mcp: FastMCP):
         memory_subtypes: Optional[str] = None,
         entities: Optional[str] = None,
         limit: int = 10,
-        min_similarity: float = 0.2
+        min_similarity: float = 0.2,
+        include_related: bool = False
     ) -> str:
         """
         Recall relevant memories using semantic search.
@@ -184,6 +185,7 @@ def register_longterm_memory_tools(mcp: FastMCP):
             entities: Comma-separated entities for exact matching (e.g., 'table:users')
             limit: Maximum number of memories to return (default: 10)
             min_similarity: Minimum similarity threshold (default: 0.2)
+            include_related: Include related memories for each result (chunking). Default: False
 
         Returns:
             JSON with matching memories and retrieval statistics
@@ -322,6 +324,42 @@ def register_longterm_memory_tools(mcp: FastMCP):
             if entity_filter and mem["entities"]:
                 if set(entity_filter) & set(mem["entities"]):
                     breakdown["entity_matches"] += 1
+
+        # Include related memories if requested (chunking)
+        if include_related and memories:
+            seen_ids = {m["memory_id"] for m in memories}
+            
+            for mem in memories:
+                related = db.execute("""
+                    SELECT 
+                        r.target_id, r.relationship, r.strength,
+                        m.content, m.memory_category, m.memory_subtype
+                    FROM memory_relationships r
+                    JOIN long_term_memories m ON r.target_id = m.memory_id
+                    WHERE r.source_id = ? AND r.user_id = ?
+                      AND m.deleted_at IS NULL
+                    ORDER BY r.strength DESC
+                    LIMIT 3
+                """, (mem["memory_id"], user_id))
+                
+                related_memories = []
+                for row in related:
+                    if row[0] not in seen_ids:  # Avoid duplicates
+                        related_memories.append({
+                            "memory_id": row[0],
+                            "relationship": row[1],
+                            "strength": row[2],
+                            "content": row[3],
+                            "memory_category": row[4],
+                            "memory_subtype": row[5]
+                        })
+                        seen_ids.add(row[0])
+                
+                mem["related_memories"] = related_memories
+            
+            breakdown["related_memories_included"] = sum(
+                len(m.get("related_memories", [])) for m in memories
+            )
 
         return json.dumps({
             "memories": memories,
@@ -490,8 +528,9 @@ def register_longterm_memory_tools(mcp: FastMCP):
         )
         session_count = session_result[0][0] if session_result else 0
 
-        # Delete all user data
+        # Delete all user data (including relationships)
         db.execute("DELETE FROM memory_access_log WHERE user_id = ?", (user_id,))
+        db.execute("DELETE FROM memory_relationships WHERE user_id = ?", (user_id,))
         db.execute("DELETE FROM working_memory_items WHERE user_id = ?", (user_id,))
         db.execute("DELETE FROM long_term_memories WHERE user_id = ?", (user_id,))
         db.execute("DELETE FROM session_contexts WHERE user_id = ?", (user_id,))
@@ -501,6 +540,392 @@ def register_longterm_memory_tools(mcp: FastMCP):
             "memories_deleted": memory_count,
             "sessions_deleted": session_count,
             "user_id": user_id
+        })
+
+    # =========================================================================
+    # MEMORY RELATIONSHIP TOOLS (Chunking)
+    # =========================================================================
+
+    @mcp.tool()
+    async def link_memories(
+        source_id: str,
+        target_id: str,
+        user_id: str,
+        relationship: str = "related_to",
+        strength: float = 1.0,
+        context: Optional[str] = None,
+        bidirectional: bool = True
+    ) -> str:
+        """
+        Create a relationship between two memories (chunking).
+
+        Supports the cognitive "Chunking" principle - grouping related items together
+        for better recall. When one memory is retrieved, related memories can be
+        pulled in for richer context.
+
+        Args:
+            source_id: The memory creating the relationship
+            target_id: The memory being linked to
+            user_id: User who owns both memories (for authorization)
+            relationship: Type of relationship:
+                - 'related_to': General association (default)
+                - 'part_of': Target is a component/chunk of source
+                - 'depends_on': Source requires target for context
+                - 'contradicts': Memories have conflicting information
+                - 'updates': Source is an update/correction of target
+            strength: Relationship strength 0.0-1.0 (default: 1.0)
+            context: Optional explanation of why these are related
+            bidirectional: Create reverse link too (default: True)
+
+        Returns:
+            JSON with relationship details
+        """
+        # Verify both memories exist and belong to user
+        source = db.execute(
+            "SELECT memory_id, content FROM long_term_memories WHERE memory_id = ? AND user_id = ? AND deleted_at IS NULL",
+            (source_id, user_id)
+        )
+        target = db.execute(
+            "SELECT memory_id, content FROM long_term_memories WHERE memory_id = ? AND user_id = ? AND deleted_at IS NULL",
+            (target_id, user_id)
+        )
+
+        if not source:
+            return json.dumps({"error": f"Source memory not found: {source_id}"})
+        if not target:
+            return json.dumps({"error": f"Target memory not found: {target_id}"})
+
+        # Validate relationship type
+        valid_relationships = ["related_to", "part_of", "depends_on", "contradicts", "updates"]
+        if relationship not in valid_relationships:
+            return json.dumps({
+                "error": f"Invalid relationship type: {relationship}",
+                "valid_types": valid_relationships
+            })
+
+        # Check if relationship already exists
+        existing = db.execute("""
+            SELECT relationship_id FROM memory_relationships
+            WHERE source_id = ? AND target_id = ? AND user_id = ?
+        """, (source_id, target_id, user_id))
+
+        if existing:
+            # Update existing relationship
+            db.execute("""
+                UPDATE memory_relationships
+                SET relationship = ?, strength = ?, context = ?
+                WHERE source_id = ? AND target_id = ? AND user_id = ?
+            """, (relationship, strength, context, source_id, target_id, user_id))
+            action = "updated"
+        else:
+            # Create new relationship
+            rel_id = str(uuid.uuid4())
+            db.execute("""
+                INSERT INTO memory_relationships (
+                    relationship_id, source_id, target_id, user_id,
+                    relationship, strength, context
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (rel_id, source_id, target_id, user_id, relationship, strength, context))
+            action = "created"
+
+        # Create bidirectional link if requested
+        if bidirectional and relationship in ["related_to", "contradicts"]:
+            reverse_existing = db.execute("""
+                SELECT relationship_id FROM memory_relationships
+                WHERE source_id = ? AND target_id = ? AND user_id = ?
+            """, (target_id, source_id, user_id))
+
+            if not reverse_existing:
+                rev_id = str(uuid.uuid4())
+                db.execute("""
+                    INSERT INTO memory_relationships (
+                        relationship_id, source_id, target_id, user_id,
+                        relationship, strength, context
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (rev_id, target_id, source_id, user_id, relationship, strength, context))
+
+        return json.dumps({
+            "success": True,
+            "action": action,
+            "source": {
+                "id": source_id,
+                "content_preview": source[0][1][:80] + "..." if len(source[0][1]) > 80 else source[0][1]
+            },
+            "target": {
+                "id": target_id,
+                "content_preview": target[0][1][:80] + "..." if len(target[0][1]) > 80 else target[0][1]
+            },
+            "relationship": relationship,
+            "strength": strength,
+            "bidirectional": bidirectional and relationship in ["related_to", "contradicts"]
+        })
+
+    @mcp.tool()
+    async def unlink_memories(
+        source_id: str,
+        target_id: str,
+        user_id: str,
+        bidirectional: bool = True
+    ) -> str:
+        """
+        Remove a relationship between two memories.
+
+        Args:
+            source_id: The source memory of the relationship
+            target_id: The target memory of the relationship
+            user_id: User who owns the memories (for authorization)
+            bidirectional: Also remove the reverse link (default: True)
+
+        Returns:
+            JSON with success status
+        """
+        # Delete the relationship
+        db.execute("""
+            DELETE FROM memory_relationships
+            WHERE source_id = ? AND target_id = ? AND user_id = ?
+        """, (source_id, target_id, user_id))
+
+        if bidirectional:
+            db.execute("""
+                DELETE FROM memory_relationships
+                WHERE source_id = ? AND target_id = ? AND user_id = ?
+            """, (target_id, source_id, user_id))
+
+        return json.dumps({
+            "success": True,
+            "unlinked": {
+                "source_id": source_id,
+                "target_id": target_id
+            },
+            "bidirectional": bidirectional
+        })
+
+    @mcp.tool()
+    async def get_related_memories(
+        memory_id: str,
+        user_id: str,
+        relationship_types: Optional[str] = None,
+        include_reverse: bool = True,
+        limit: int = 10
+    ) -> str:
+        """
+        Get all memories related to a given memory.
+
+        Retrieves the "chunk" of related memories for richer context during recall.
+        This supports the cognitive Chunking principle.
+
+        Args:
+            memory_id: The memory to find relations for
+            user_id: User who owns the memory (for authorization)
+            relationship_types: Comma-separated relationship types to filter
+                               (e.g., 'related_to,part_of'). None = all types.
+            include_reverse: Include memories that link TO this memory (default: True)
+            limit: Maximum related memories to return (default: 10)
+
+        Returns:
+            JSON with related memories and relationship details
+        """
+        # Verify memory exists
+        memory = db.execute(
+            "SELECT memory_id, content, memory_category FROM long_term_memories WHERE memory_id = ? AND user_id = ? AND deleted_at IS NULL",
+            (memory_id, user_id)
+        )
+
+        if not memory:
+            return json.dumps({"error": f"Memory not found: {memory_id}"})
+
+        # Build query for outgoing relationships
+        conditions = ["r.source_id = ?", "r.user_id = ?"]
+        params: List = [memory_id, user_id]
+
+        if relationship_types:
+            types = [t.strip() for t in relationship_types.split(",")]
+            placeholders = ",".join(["?" for _ in types])
+            conditions.append(f"r.relationship IN ({placeholders})")
+            params.extend(types)
+
+        where_clause = " AND ".join(conditions)
+
+        # Get outgoing relationships (this memory -> others)
+        outgoing = db.execute(f"""
+            SELECT 
+                r.target_id, r.relationship, r.strength, r.context,
+                m.content, m.memory_category, m.memory_subtype, m.importance
+            FROM memory_relationships r
+            JOIN long_term_memories m ON r.target_id = m.memory_id
+            WHERE {where_clause}
+              AND m.deleted_at IS NULL
+            ORDER BY r.strength DESC
+            LIMIT ?
+        """, (*params, limit))
+
+        related = []
+        for row in outgoing:
+            related.append({
+                "memory_id": row[0],
+                "relationship": row[1],
+                "direction": "outgoing",
+                "strength": row[2],
+                "context": row[3],
+                "content": row[4],
+                "memory_category": row[5],
+                "memory_subtype": row[6],
+                "importance": row[7]
+            })
+
+        # Get incoming relationships (others -> this memory)
+        if include_reverse:
+            conditions[0] = "r.target_id = ?"
+            params[0] = memory_id
+            where_clause = " AND ".join(conditions)
+
+            incoming = db.execute(f"""
+                SELECT 
+                    r.source_id, r.relationship, r.strength, r.context,
+                    m.content, m.memory_category, m.memory_subtype, m.importance
+                FROM memory_relationships r
+                JOIN long_term_memories m ON r.source_id = m.memory_id
+                WHERE {where_clause}
+                  AND m.deleted_at IS NULL
+                ORDER BY r.strength DESC
+                LIMIT ?
+            """, (*params, limit))
+
+            for row in incoming:
+                # Avoid duplicates from bidirectional links
+                if not any(r["memory_id"] == row[0] for r in related):
+                    related.append({
+                        "memory_id": row[0],
+                        "relationship": row[1],
+                        "direction": "incoming",
+                        "strength": row[2],
+                        "context": row[3],
+                        "content": row[4],
+                        "memory_category": row[5],
+                        "memory_subtype": row[6],
+                        "importance": row[7]
+                    })
+
+        # Sort by strength and limit
+        related.sort(key=lambda x: x["strength"], reverse=True)
+        related = related[:limit]
+
+        return json.dumps({
+            "memory_id": memory_id,
+            "memory_content": memory[0][1][:100] + "..." if len(memory[0][1]) > 100 else memory[0][1],
+            "memory_category": memory[0][2],
+            "related_count": len(related),
+            "related_memories": related
+        })
+
+    @mcp.tool()
+    async def auto_link_similar(
+        memory_id: str,
+        user_id: str,
+        similarity_threshold: float = 0.75,
+        max_links: int = 5
+    ) -> str:
+        """
+        Automatically link a memory to similar memories.
+
+        Uses vector similarity to find related memories and creates
+        'related_to' relationships automatically. Useful for building
+        memory chunks without manual curation.
+
+        Args:
+            memory_id: The memory to find similar memories for
+            user_id: User who owns the memory
+            similarity_threshold: Minimum similarity to create link (default: 0.75)
+            max_links: Maximum number of links to create (default: 5)
+
+        Returns:
+            JSON with created links
+        """
+        # Get the memory and its content for re-embedding
+        memory = db.execute(
+            "SELECT memory_id, content, memory_category FROM long_term_memories WHERE memory_id = ? AND user_id = ? AND deleted_at IS NULL",
+            (memory_id, user_id)
+        )
+
+        if not memory:
+            return json.dumps({"error": f"Memory not found: {memory_id}"})
+
+        content = memory[0][1]
+        category = memory[0][2]
+        
+        # Generate fresh embedding (DB returns string format, so regenerate)
+        embedding = embedding_service.generate(content)
+        embedding_literal = _format_embedding_literal(embedding)
+
+        # Find similar memories (same category for better relevance)
+        similar = db.execute(f"""
+            SELECT 
+                memory_id, content,
+                VECTOR_COSINE_SIMILARITY(embedding, {embedding_literal}) AS similarity
+            FROM long_term_memories
+            WHERE user_id = ?
+              AND memory_id != ?
+              AND memory_category = ?
+              AND deleted_at IS NULL
+            ORDER BY similarity DESC
+            LIMIT ?
+        """, (user_id, memory_id, category, max_links * 2))
+
+        # Create links for memories above threshold
+        links_created = []
+        for row in similar:
+            sim_id, sim_content, similarity = row
+            
+            if similarity is None or similarity < similarity_threshold:
+                continue
+
+            if len(links_created) >= max_links:
+                break
+
+            # Check if link already exists
+            existing = db.execute("""
+                SELECT 1 FROM memory_relationships
+                WHERE source_id = ? AND target_id = ? AND user_id = ?
+            """, (memory_id, sim_id, user_id))
+
+            if not existing:
+                rel_id = str(uuid.uuid4())
+                db.execute("""
+                    INSERT INTO memory_relationships (
+                        relationship_id, source_id, target_id, user_id,
+                        relationship, strength, context
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    rel_id, memory_id, sim_id, user_id,
+                    "related_to", round(similarity, 4),
+                    f"Auto-linked by similarity ({round(similarity, 2)})"
+                ))
+
+                # Bidirectional
+                rev_id = str(uuid.uuid4())
+                db.execute("""
+                    INSERT INTO memory_relationships (
+                        relationship_id, source_id, target_id, user_id,
+                        relationship, strength, context
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    rev_id, sim_id, memory_id, user_id,
+                    "related_to", round(similarity, 4),
+                    f"Auto-linked by similarity ({round(similarity, 2)})"
+                ))
+
+                links_created.append({
+                    "target_id": sim_id,
+                    "content_preview": sim_content[:80] + "..." if len(sim_content) > 80 else sim_content,
+                    "similarity": round(similarity, 4)
+                })
+
+        return json.dumps({
+            "success": True,
+            "memory_id": memory_id,
+            "links_created": len(links_created),
+            "links": links_created,
+            "threshold_used": similarity_threshold
         })
 
 

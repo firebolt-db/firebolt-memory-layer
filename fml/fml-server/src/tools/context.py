@@ -347,11 +347,18 @@ async def _get_memories_by_type(
     entity_filter: List[str],
     limit: int = 5
 ) -> List[Dict]:
-    """Get memories of a specific type with vector similarity."""
-    results = db.execute("""
+    """Get memories of a specific type with vector similarity.
+    
+    Note: We explicitly select only needed columns to avoid Firebolt Core bug
+    with NULL array columns (related_memories) that causes S3 file errors.
+    """
+    # Format embedding as literal for Firebolt 4.28
+    emb_literal = "[" + ", ".join(str(v) for v in query_embedding) + "]::ARRAY(DOUBLE)"
+    
+    results = db.execute(f"""
         SELECT
             memory_id, content, entities, importance,
-            VECTOR_COSINE_SIMILARITY(embedding, ?) AS similarity
+            VECTOR_COSINE_SIMILARITY(embedding, {emb_literal}) AS similarity
         FROM long_term_memories
         WHERE user_id = ?
           AND memory_category = ?
@@ -359,7 +366,7 @@ async def _get_memories_by_type(
           AND deleted_at IS NULL
         ORDER BY similarity DESC
         LIMIT ?
-    """, (query_embedding, user_id, category, subtype, limit))
+    """, (user_id, category, subtype, limit))
 
     memories = []
     for row in results:

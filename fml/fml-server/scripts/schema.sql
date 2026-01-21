@@ -83,7 +83,8 @@ CREATE TABLE IF NOT EXISTS long_term_memories (
     decay_factor    REAL DEFAULT 1.0,
 
     -- Relationships
-    related_memories ARRAY(TEXT),
+    -- NOTE: related_memories column removed due to Firebolt Core bug with NULL arrays
+    -- causing "Secondary file s3://...related_memories.null1.bin does not exist" errors
     supersedes      TEXT,
 
     -- Source tracking
@@ -113,6 +114,28 @@ CREATE INDEX idx_memories_embedding ON long_term_memories USING HNSW (
     ef_construction = 128,
     quantization = 'bf16'
 );
+
+
+-- Memory relationships (join table for memory linking/chunking)
+-- Supports the cognitive "Chunking" principle: related items grouped together
+-- Uses join table instead of array column to avoid Firebolt Core NULL array bugs
+CREATE TABLE IF NOT EXISTS memory_relationships (
+    relationship_id TEXT NOT NULL,
+    source_id       TEXT NOT NULL,      -- The memory creating the relationship
+    target_id       TEXT NOT NULL,      -- The memory being linked to
+    user_id         TEXT NOT NULL,      -- Owner (for authorization)
+    
+    -- Relationship type for flexible linking
+    relationship    TEXT NOT NULL,      -- 'related_to', 'part_of', 'depends_on', 'contradicts', 'updates'
+    
+    -- Optional context
+    strength        REAL DEFAULT 1.0,   -- Relationship strength (0.0-1.0)
+    context         TEXT,               -- Why these are related
+    
+    created_at      TIMESTAMPNTZ DEFAULT CURRENT_TIMESTAMP(),
+    created_by      TEXT                -- Session or process that created this
+)
+PRIMARY INDEX relationship_id;
 
 
 -- Memory access log for analytics

@@ -1026,9 +1026,10 @@ function RecentCalls({ calls, delay = 0 }) {
 
 // Main App Component
 export default function App() {
-  const [stats, setStats] = useState(MOCK_STATS)
+  const [stats, setStats] = useState(null)
   const [recentCalls, setRecentCalls] = useState([])
   const [connected, setConnected] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [lastUpdate, setLastUpdate] = useState(null)
   const [brainConfig, setBrainConfig] = useState(null)
 
@@ -1052,10 +1053,17 @@ export default function App() {
         setStats(data)
         setConnected(true)
         setLastUpdate(new Date())
+      } else {
+        // API returned error, use mock data for demo
+        setStats(MOCK_STATS)
+        setConnected(false)
       }
     } catch (e) {
-      // API not available, use mock data
+      // API not available, use mock data for demo
+      setStats(MOCK_STATS)
       setConnected(false)
+    } finally {
+      setLoading(false)
     }
   }, [])
 
@@ -1090,6 +1098,47 @@ export default function App() {
     const mins = Math.floor((seconds % 3600) / 60)
     return hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`
   }
+
+  // Show loading state on initial load
+  if (loading) {
+    return (
+      <div className="dashboard">
+        <div className="loading-container">
+          <div className="loading-spinner" />
+          <div className="loading-text">Connecting to FML...</div>
+        </div>
+        <style>{`
+          .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            gap: 24px;
+          }
+          .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(255, 77, 0, 0.2);
+            border-top-color: #ff4d00;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          }
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+          .loading-text {
+            font-size: 16px;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+          }
+        `}</style>
+      </div>
+    )
+  }
+
+  // Safe accessor for stats (fallback to empty object structure)
+  const safeStats = stats || { services: {}, memory: {} }
 
   return (
     <div className="dashboard">
@@ -1137,30 +1186,30 @@ export default function App() {
         <section className="stats-row">
           <StatCard 
             title="Long-term Memories" 
-            value={stats.memory?.long_term_memories || 0}
+            value={safeStats.memory?.long_term_memories || 0}
             icon="🧠"
             color="fire"
             delay={100}
           />
           <StatCard 
             title="Active Sessions" 
-            value={stats.memory?.active_sessions || 0}
+            value={safeStats.memory?.active_sessions || 0}
             icon="⚡"
             color="cyan"
             delay={150}
           />
           <StatCard 
             title="Working Memory" 
-            value={`${stats.memory?.working_memory_tokens?.toLocaleString() || 0} tokens`}
-            subtitle={`${stats.memory?.working_memory_items || 0} items`}
+            value={`${safeStats.memory?.working_memory_tokens?.toLocaleString() || 0} tokens`}
+            subtitle={`${safeStats.memory?.working_memory_items || 0} items`}
             icon="📝"
             color="purple"
             delay={200}
           />
           <StatCard 
             title="Storage Size" 
-            value={stats.memory?.storage?.total_compressed_formatted || '0 B'}
-            subtitle={`${stats.memory?.storage?.total_uncompressed_formatted || '0 B'} uncompressed`}
+            value={safeStats.memory?.storage?.total_compressed_formatted || '0 B'}
+            subtitle={`${safeStats.memory?.storage?.total_uncompressed_formatted || '0 B'} uncompressed`}
             icon="💾"
             color="green"
             delay={250}
@@ -1173,19 +1222,19 @@ export default function App() {
           <div className="services-grid">
             <ServicePanel 
               name="ollama" 
-              data={stats.services?.ollama || {}} 
+              data={safeStats.services?.ollama || {}} 
               config={brainConfig}
               delay={300}
             />
             <ServicePanel 
-              name="firebolt" 
-              data={stats.services?.firebolt || {}} 
+              name="embedding" 
+              data={safeStats.services?.embedding || {}} 
               config={brainConfig}
               delay={350}
             />
             <ServicePanel 
-              name="embedding" 
-              data={stats.services?.embedding || {}} 
+              name="firebolt" 
+              data={safeStats.services?.firebolt || {}} 
               config={brainConfig}
               delay={400}
             />
@@ -1195,7 +1244,7 @@ export default function App() {
         {/* Charts Row */}
         <section className="charts-section">
           <MemoryDistribution 
-            data={stats.memory?.by_category} 
+            data={safeStats.memory?.by_category} 
             delay={350}
           />
           <RecentCalls 
@@ -1205,11 +1254,11 @@ export default function App() {
         </section>
 
         {/* Top Accessed */}
-        {stats.memory?.top_accessed?.length > 0 && (
+        {safeStats.memory?.top_accessed?.length > 0 && (
           <section className="top-accessed animate-slide-up" style={{ animationDelay: '450ms' }}>
             <h2 className="section-title">Most Accessed Memories</h2>
             <div className="memory-list">
-              {stats.memory.top_accessed.map((mem, i) => (
+              {safeStats.memory.top_accessed.map((mem, i) => (
                 <div key={i} className="memory-item">
                   <span 
                     className="memory-category" 

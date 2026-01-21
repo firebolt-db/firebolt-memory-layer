@@ -133,14 +133,14 @@ class FireboltClient:
         # Build request with vector search settings enabled
         # Use root endpoint (not /query) for better compatibility
         url = self.core_url
-        params = ["output_format=TabSeparatedWithNamesAndTypes"]
+        url_params = ["output_format=TabSeparatedWithNamesAndTypes"]
         if self.database:
-            params.append(f"database={self.database}")
+            url_params.append(f"database={self.database}")
         # Enable advanced features for vector search
-        params.append("advanced_mode=1")
-        params.append("enable_vector_search_index_creation=1")
-        params.append("enable_vector_search_tvf=1")
-        url += "?" + "&".join(params)
+        url_params.append("advanced_mode=1")
+        url_params.append("enable_vector_search_index_creation=1")
+        url_params.append("enable_vector_search_tvf=1")
+        url += "?" + "&".join(url_params)
 
         response = requests.post(
             url,

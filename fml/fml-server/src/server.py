@@ -8,6 +8,7 @@ from src.tools.working_memory import register_working_memory_tools
 from src.tools.longterm_memory import register_longterm_memory_tools
 from src.tools.context import register_context_tools
 from src.tools.stats import register_stats_tools
+from src.tools.quality import register_quality_tools
 
 # Configure logging
 logging.basicConfig(
@@ -37,6 +38,11 @@ Available tools:
 - get_fml_stats: Get server statistics and metrics for monitoring
 - get_recent_calls: Get recent API calls for a service
 - get_memory_analytics: Get detailed memory analytics and distribution
+- memory_quality_report: Generate memory health report
+- find_memory_contradictions: Find potentially outdated/contradictory memories
+- supersede_memory: Mark old memory as replaced by newer one
+- apply_memory_decay: Reduce importance of unused memories
+- run_daily_maintenance: Run backup, decay, and quality checks
 """,
 )
 
@@ -56,6 +62,9 @@ def setup_server():
 
     register_stats_tools(mcp)
     logger.info("  ✓ Stats/monitoring tools registered")
+
+    register_quality_tools(mcp)
+    logger.info("  ✓ Quality/maintenance tools registered")
 
     logger.info("All tools registered successfully!")
 
