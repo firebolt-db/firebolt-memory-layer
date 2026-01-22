@@ -26,23 +26,55 @@ At the START of every conversation, BEFORE responding to any user request:
 - Use content_type: "message" for important user statements
 - Use content_type: "scratchpad" for your observations
 
-### Store Important Learnings (IMMEDIATE - call `store_memory`)
-Store these IMMEDIATELY when encountered - don't wait:
-- User preferences (coding style, tool preferences, environment setup)
-- Project decisions and architecture choices
-- Solutions that worked for specific problems
-- Configuration values, connection strings (NOT credentials)
-- Error fixes and workarounds discovered
-- User says "remember this" or "save this" or similar
+### 🔄 AUTOMATIC Memory Extraction (DO THIS PROACTIVELY)
 
-### Automatic Triggers for `store_memory`:
+**After EVERY response you give**, silently scan for memorable content and store it WITHOUT being asked.
+
+#### Auto-Store These Patterns (call `store_memory` automatically):
+| Pattern Detected | Category | Importance |
+|-----------------|----------|------------|
+| Bug fix or error resolution | procedural.workflow | 0.9 |
+| User explains how something works | semantic.domain | 0.85 |
+| Architecture/design decision made | episodic.decision | 0.9 |
+| New tool/library/API usage learned | procedural.tool_usage | 0.85 |
+| User preference expressed (likes/dislikes) | preference.style | 0.8 |
+| Configuration or setup steps | procedural.workflow | 0.85 |
+| Project-specific knowledge | semantic.project | 0.8 |
+| Person/team mentioned with role | semantic.entity | 0.7 |
+| Workaround or gotcha discovered | procedural.pattern | 0.9 |
+| User corrects your mistake | semantic.domain | 0.85 |
+
+#### How to Auto-Extract:
+1. **Don't announce** you're storing - just do it silently
+2. **Summarize** the learning (don't store raw conversation)
+3. **Extract entities** (tools, files, people, concepts)
+4. **Set appropriate importance** based on table above
+5. **Include context** that makes the memory useful later
+
+#### Example Auto-Extraction:
+```
+User: "The Kafka connector takes 2 minutes to sync changes to Firebolt"
+→ Silently call: store_memory(
+    user_id="johnkennedy",
+    content="Firebolt Kafka connector latency: ~2 minutes from Kafka write to Firebolt visibility. Plan for this delay in real-time dashboards.",
+    memory_category="procedural",
+    memory_subtype="tool_usage",
+    importance=0.85,
+    entities="tool:kafka-connector,tool:firebolt"
+)
+```
+
+### Explicit Triggers for `store_memory`:
 | User Says | Action |
 |-----------|--------|
-| "Remember this/that" | Store immediately with high importance |
+| "Remember this/that" | Store immediately with importance 0.95 |
 | "Save this for later" | Store with importance 0.9 |
 | "This is important" | Store with importance 0.95 |
 | "Don't forget" | Store with importance 0.9 |
 | Any solution after debugging | Store as procedural/workflow |
+
+### 🔄 Periodic Checkpoint (Every 5-10 exchanges)
+After extended conversations, call `checkpoint_working_memory` to auto-promote important items to long-term storage.
 
 ### End of Conversation Checkpoint
 When conversation is winding down or user says goodbye:
