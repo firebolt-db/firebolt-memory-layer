@@ -160,13 +160,22 @@ class DashboardAPIHandler(BaseHTTPRequestHandler):
             """)
 
             # Get storage sizes from SHOW TABLES
+            # Include all FML tables for accurate total
+            FML_TABLES = [
+                'long_term_memories', 
+                'working_memory_items', 
+                'session_contexts', 
+                'memory_access_log',
+                'memory_relationships',  # Join table for memory linking
+                'tool_error_log',        # Error tracking
+                'service_metrics',       # Ollama/embedding metrics (if exists)
+            ]
             storage_stats = {"total_compressed": 0, "total_uncompressed": 0, "tables": {}}
             try:
                 tables_result = db.execute("SHOW TABLES")
                 for row in tables_result:
                     table_name = row[0]
-                    if table_name in ['long_term_memories', 'working_memory_items', 
-                                     'session_contexts', 'memory_access_log']:
+                    if table_name in FML_TABLES:
                         row_count = int(row[5]) if row[5] else 0
                         compressed = row[6] if row[6] else "0 B"
                         uncompressed = row[7] if row[7] else "0 B"

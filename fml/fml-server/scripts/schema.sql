@@ -168,3 +168,18 @@ CREATE TABLE IF NOT EXISTS tool_error_log (
     created_at      TIMESTAMPNTZ DEFAULT CURRENT_TIMESTAMP()
 )
 PRIMARY INDEX error_id;
+
+
+-- Service metrics for Ollama/embedding call tracking (cross-process visibility)
+CREATE TABLE IF NOT EXISTS service_metrics (
+    metric_id       TEXT NOT NULL,
+    service         TEXT NOT NULL,       -- 'ollama', 'embedding'
+    operation       TEXT NOT NULL,       -- 'classify', 'summarize', 'embed', etc.
+    latency_ms      REAL NOT NULL,
+    success         BOOLEAN DEFAULT TRUE,
+    error_msg       TEXT,
+    tokens_in       INT,
+    tokens_out      INT,
+    recorded_at     TIMESTAMPNTZ DEFAULT CURRENT_TIMESTAMP()
+)
+PRIMARY INDEX metric_id;
