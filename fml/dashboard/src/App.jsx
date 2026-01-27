@@ -955,7 +955,7 @@ function ServicePanel({ name, data, config, delay = 0 }) {
 function MemoryDistribution({ data, delay = 0 }) {
   const chartData = Object.entries(data || {}).map(([name, value]) => ({
     name: name.charAt(0).toUpperCase() + name.slice(1),
-    value,
+    value: parseInt(value, 10) || 0,  // Convert string to number for chart
     color: CATEGORY_COLORS[name] || COLORS.fire
   }))
 
