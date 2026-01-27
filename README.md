@@ -12,9 +12,36 @@ An intelligent, persistent memory system for LLM agents using local Firebolt Cor
 
 ---
 
-## New Laptop Setup Guide
+## Quick Start (Recommended)
 
-Follow these steps to set up FML from scratch on a new machine.
+For the fastest setup, use the bootstrap script after cloning:
+
+```bash
+# Clone the repository
+git clone git@github.com:johnkennedy-cmyk/Firebolt-Memory-Layer.git
+cd Firebolt-Memory-Layer
+
+# Ensure Firebolt Core and Ollama are running first (see Prerequisites below)
+
+# Run the bootstrap script - does everything automatically
+cd fml/fml-server
+./scripts/bootstrap.sh
+```
+
+The bootstrap script will:
+- Set up Python virtual environment and dependencies
+- Create database schema and tables
+- **Seed core memories** (security rules, workflows, troubleshooting guides)
+- Configure Cursor IDE with FML rules and MCP settings
+- Set up pre-commit security hooks
+
+After bootstrap completes, **restart Cursor** and start chatting!
+
+---
+
+## Manual Setup Guide
+
+If you prefer manual setup or the bootstrap script doesn't work for your environment:
 
 ### Prerequisites
 
@@ -122,7 +149,22 @@ This creates:
 - `memory_access_log` table (analytics)
 - `idx_memories_embedding` HNSW vector index (768 dimensions for Ollama)
 
-### Step 6: Test the Setup
+### Step 6: Seed Core Memories (Recommended)
+
+Pre-load essential memories for security rules, workflows, and troubleshooting:
+
+```bash
+# Seed core memories for optimal experience
+python scripts/seed_core_memories.py
+```
+
+This creates foundational memories that help FML:
+- Enforce security rules consistently
+- Follow proper session workflows
+- Troubleshoot common issues
+- Understand FML architecture
+
+### Step 7: Test the Setup
 
 ```bash
 # Test all connections
@@ -130,9 +172,12 @@ python scripts/test_connections.py
 
 # Test the MCP tools
 python scripts/test_tools.py
+
+# Test security validation
+python scripts/test_security.py
 ```
 
-### Step 7: Configure Cursor to Use FML
+### Step 8: Configure Cursor to Use FML
 
 Create or edit `~/.cursor/mcp.json`:
 
@@ -169,11 +214,11 @@ Example for typical setup:
 }
 ```
 
-### Step 8: Add Global Cursor Rules
+### Step 9: Add Global Cursor Rules
 
 Create `~/.cursor/rules/fml-memory.mdc` with the content from `cursor-rules/fml-memory.mdc` in this repo. This tells all Cursor agents to use FML automatically.
 
-### Step 9: Restart Cursor
+### Step 10: Restart Cursor
 
 After adding the MCP config and rules, restart Cursor completely (Cmd+Q, then reopen).
 

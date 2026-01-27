@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "fml": {
+      "command": "/FULL/PATH/TO/Firebolt-Memory-Layer/fml/fml-server/.venv/bin/python",
+      "args": ["-m", "src.server"],
+      "cwd": "/FULL/PATH/TO/Firebolt-Memory-Layer/fml/fml-server",
+      "env": {
+        "PYTHONPATH": "/FULL/PATH/TO/Firebolt-Memory-Layer/fml/fml-server"
+      }
+    }
+  }
+}
