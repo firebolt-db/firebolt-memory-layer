@@ -471,4 +471,4 @@ If you discover a security vulnerability, please:
 
 ## License
 
-MIT
+Apache 2.0
