@@ -71,10 +71,10 @@ const MOCK_STATS = {
 
 // Color palette
 const COLORS = {
-  fire: '#ff4d00',
-  cyan: '#00f0ff',
-  purple: '#9d4edd',
-  green: '#00ff88',
+  fire: '#F72A30',
+  cyan: '#F72A30',
+  purple: '#AC2422',
+  green: '#FF4848',
   yellow: '#ffd60a',
 }
 
@@ -269,14 +269,14 @@ function DataFlowDiagram({ config, delay = 0 }) {
           <defs>
             {/* Gradient for request flow */}
             <linearGradient id="requestGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#00f0ff" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#00f0ff" stopOpacity="0.4" />
+              <stop offset="0%" stopColor="#F72A30" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#F72A30" stopOpacity="0.4" />
             </linearGradient>
             
             {/* Gradient for response flow */}
             <linearGradient id="responseGradient" x1="0%" y1="100%" x2="0%" y2="0%">
-              <stop offset="0%" stopColor="#00ff88" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#00ff88" stopOpacity="0.4" />
+              <stop offset="0%" stopColor="#FF4848" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#FF4848" stopOpacity="0.4" />
             </linearGradient>
             
             {/* Arrow marker for requests */}
@@ -290,7 +290,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
               markerUnits="userSpaceOnUse"
               viewBox="0 0 12 12"
             >
-              <path d="M0,0 L0,12 L12,6 z" fill="#00f0ff" stroke="#00f0ff" strokeWidth="0.5" />
+              <path d="M0,0 L0,12 L12,6 z" fill="#F72A30" stroke="#F72A30" strokeWidth="0.5" />
             </marker>
             
             {/* Arrow marker for responses */}
@@ -304,7 +304,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
               markerUnits="userSpaceOnUse"
               viewBox="0 0 12 12"
             >
-              <path d="M0,0 L0,12 L12,6 z" fill="#00ff88" stroke="#00ff88" strokeWidth="0.5" />
+              <path d="M0,0 L0,12 L12,6 z" fill="#FF4848" stroke="#FF4848" strokeWidth="0.5" />
             </marker>
             
             {/* Glow filter for animated packets */}
@@ -322,7 +322,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           {/* Cursor → Firebolt MCP Server (right side to top right, straight line) */}
           <path
             d={`M ${cursorRightOut.x} ${cursorRightOut.y} L ${fireboltMcpTopRight.x} ${fireboltMcpTopRight.y}`}
-            stroke="#00f0ff"
+            stroke="#F72A30"
             strokeWidth="2.5"
             fill="none"
             markerEnd="url(#arrowRequest)"
@@ -333,7 +333,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           <text
             x={(cursorRightOut.x + fireboltMcpTopRight.x) / 2 + 20}
             y={(cursorRightOut.y + fireboltMcpTopRight.y) / 2 + 10}
-            fill="#9d4edd"
+            fill="#AC2422"
             fontSize="12"
             fontWeight="700"
             textAnchor="middle"
@@ -346,7 +346,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           {/* Firebolt MCP Server → Firebolt Core (bottom left to top left, separated) */}
           <path
             d={`M ${fireboltMcpBottomLeft.x} ${fireboltMcpBottomLeft.y} L ${fireboltCoreTopLeft.x} ${fireboltCoreTopLeft.y}`}
-            stroke="#00f0ff"
+            stroke="#F72A30"
             strokeWidth="2.5"
             fill="none"
             markerEnd="url(#arrowRequest)"
@@ -357,7 +357,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           <text
             x={(fireboltMcpBottomLeft.x + fireboltCoreTopLeft.x) / 2 - 20}
             y={(fireboltMcpBottomLeft.y + fireboltCoreTopLeft.y) / 2}
-            fill="#9d4edd"
+            fill="#AC2422"
             fontSize="12"
             fontWeight="700"
             textAnchor="middle"
@@ -370,7 +370,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           {/* Firebolt Core → Firebolt MCP Server (top right to bottom right, separated) */}
           <path
             d={`M ${fireboltCoreTopRight.x} ${fireboltCoreTopRight.y} L ${fireboltMcpBottomRight.x} ${fireboltMcpBottomRight.y}`}
-            stroke="#00ff88"
+            stroke="#FF4848"
             strokeWidth="2.5"
             fill="none"
             markerEnd="url(#arrowResponse)"
@@ -382,7 +382,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           <text
             x={(fireboltCoreTopRight.x + fireboltMcpBottomRight.x) / 2 + 20}
             y={(fireboltCoreTopRight.y + fireboltMcpBottomRight.y) / 2}
-            fill="#9d4edd"
+            fill="#AC2422"
             fontSize="12"
             fontWeight="700"
             textAnchor="middle"
@@ -395,7 +395,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           {/* Firebolt MCP Server → Cursor (top left to right side below, straight line) */}
           <path
             d={`M ${fireboltMcpTopLeft.x} ${fireboltMcpTopLeft.y} L ${cursorRightIn.x} ${cursorRightIn.y}`}
-            stroke="#00ff88"
+            stroke="#FF4848"
             strokeWidth="2.5"
             fill="none"
             markerEnd="url(#arrowResponse)"
@@ -407,7 +407,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           <text
             x={(fireboltMcpTopLeft.x + cursorRightIn.x) / 2 - 20}
             y={(fireboltMcpTopLeft.y + cursorRightIn.y) / 2 - 10}
-            fill="#9d4edd"
+            fill="#AC2422"
             fontSize="12"
             fontWeight="700"
             textAnchor="middle"
@@ -430,7 +430,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           <text
             x={(cursorBottomLeft.x + fmlTopLeft.x) / 2}
             y={(cursorBottomLeft.y + fmlTopLeft.y) / 2 - 15}
-            fill="#00f0ff"
+            fill="#F72A30"
             fontSize="14"
             fontWeight="700"
             textAnchor="middle"
@@ -441,7 +441,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           {/* Animated packet on Cursor → FML */}
           <circle
             r="6"
-            fill="#00f0ff"
+            fill="#F72A30"
             filter="url(#glow)"
             className="data-packet-svg packet-1"
           >
@@ -466,7 +466,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           <text
             x={(fmlLeftOut.x + ollamaRightIn.x) / 2 - 25}
             y={(fmlLeftOut.y + ollamaRightIn.y) / 2 + 50}
-            fill="#00f0ff"
+            fill="#F72A30"
             fontSize="12"
             fontWeight="700"
             textAnchor="middle"
@@ -477,7 +477,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           </text>
           <circle
             r="5"
-            fill="#00f0ff"
+            fill="#F72A30"
             filter="url(#glow)"
             className="data-packet-svg packet-2"
           >
@@ -503,7 +503,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           <text
             x={(fmlBottomLeft.x + embedTopIn.x) / 2 - 25}
             y={(fmlBottomLeft.y + embedTopIn.y) / 2 - 10}
-            fill="#00f0ff"
+            fill="#F72A30"
             fontSize="12"
             fontWeight="700"
             textAnchor="middle"
@@ -514,7 +514,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           </text>
           <circle
             r="5"
-            fill="#00f0ff"
+            fill="#F72A30"
             filter="url(#glow)"
             className="data-packet-svg packet-3"
           >
@@ -540,7 +540,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           <text
             x={(fmlRightOut.x + fireboltLeftIn.x) / 2 + 25}
             y={(fmlRightOut.y + fireboltLeftIn.y) / 2 + 50}
-            fill="#00f0ff"
+            fill="#F72A30"
             fontSize="12"
             fontWeight="700"
             textAnchor="middle"
@@ -551,7 +551,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           </text>
           <circle
             r="5"
-            fill="#00f0ff"
+            fill="#F72A30"
             filter="url(#glow)"
             className="data-packet-svg packet-4"
           >
@@ -580,7 +580,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           <text
             x={(ollamaRightOut.x + fmlLeftIn.x) / 2 + 10}
             y={(ollamaRightOut.y + fmlLeftIn.y) / 2 - 20}
-            fill="#00ff88"
+            fill="#FF4848"
             fontSize="12"
             fontWeight="700"
             textAnchor="middle"
@@ -591,7 +591,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           </text>
           <circle
             r="5"
-            fill="#00ff88"
+            fill="#FF4848"
             filter="url(#glow)"
             className="data-packet-svg packet-5"
           >
@@ -618,7 +618,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           <text
             x={(embedTopOut.x + fmlBottomRight.x) / 2 + 25}
             y={(embedTopOut.y + fmlBottomRight.y) / 2 - 10}
-            fill="#00ff88"
+            fill="#FF4848"
             fontSize="12"
             fontWeight="700"
             textAnchor="middle"
@@ -629,7 +629,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           </text>
           <circle
             r="5"
-            fill="#00ff88"
+            fill="#FF4848"
             filter="url(#glow)"
             className="data-packet-svg packet-6"
           >
@@ -656,7 +656,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           <text
             x={(fireboltLeftOut.x + fmlRightIn.x) / 2 - 10}
             y={(fireboltLeftOut.y + fmlRightIn.y) / 2 - 20}
-            fill="#00ff88"
+            fill="#FF4848"
             fontSize="12"
             fontWeight="700"
             textAnchor="middle"
@@ -667,7 +667,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           </text>
           <circle
             r="5"
-            fill="#00ff88"
+            fill="#FF4848"
             filter="url(#glow)"
             className="data-packet-svg packet-7"
           >
@@ -693,7 +693,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           <text
             x={(fmlTopRight.x + cursorBottomRight.x) / 2}
             y={(fmlTopRight.y + cursorBottomRight.y) / 2 - 15}
-            fill="#00ff88"
+            fill="#FF4848"
             fontSize="14"
             fontWeight="700"
             textAnchor="middle"
@@ -703,7 +703,7 @@ function DataFlowDiagram({ config, delay = 0 }) {
           </text>
           <circle
             r="6"
-            fill="#00ff88"
+            fill="#FF4848"
             filter="url(#glow)"
             className="data-packet-svg packet-8"
           >
@@ -1119,8 +1119,8 @@ export default function App() {
           .loading-spinner {
             width: 48px;
             height: 48px;
-            border: 3px solid rgba(255, 77, 0, 0.2);
-            border-top-color: #ff4d00;
+            border: 3px solid rgba(247, 42, 48, 0.2);
+            border-top-color: #F72A30;
             border-radius: 50%;
             animation: spin 1s linear infinite;
           }
@@ -1362,13 +1362,13 @@ export default function App() {
         }
 
         .brain-location.local {
-          background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(0, 240, 255, 0.1));
-          border: 1px solid rgba(0, 255, 136, 0.3);
+          background: linear-gradient(135deg, rgba(255, 72, 72, 0.15), rgba(247, 42, 48, 0.1));
+          border: 1px solid rgba(255, 72, 72, 0.3);
         }
 
         .brain-location.cloud {
-          background: linear-gradient(135deg, rgba(157, 78, 221, 0.15), rgba(255, 77, 0, 0.1));
-          border: 1px solid rgba(157, 78, 221, 0.3);
+          background: linear-gradient(135deg, rgba(172, 36, 34, 0.15), rgba(247, 42, 48, 0.1));
+          border: 1px solid rgba(172, 36, 34, 0.3);
         }
 
         .brain-icon {
@@ -1490,7 +1490,7 @@ export default function App() {
         }
 
         .dataflow-container {
-          background: linear-gradient(135deg, rgba(255, 77, 0, 0.03), rgba(0, 240, 255, 0.03));
+          background: linear-gradient(135deg, rgba(247, 42, 48, 0.03), rgba(247, 42, 48, 0.03));
           border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 16px;
           padding: 40px;
@@ -1553,21 +1553,21 @@ export default function App() {
         }
 
         .flow-steps-legend .step-num.request {
-          background: rgba(0, 240, 255, 0.2);
-          color: #00f0ff;
-          border: 1px solid rgba(0, 240, 255, 0.4);
+          background: rgba(247, 42, 48, 0.2);
+          color: #F72A30;
+          border: 1px solid rgba(247, 42, 48, 0.4);
         }
 
         .flow-steps-legend .step-num.response {
-          background: rgba(0, 255, 136, 0.2);
-          color: #00ff88;
-          border: 1px solid rgba(0, 255, 136, 0.4);
+          background: rgba(255, 72, 72, 0.2);
+          color: #FF4848;
+          border: 1px solid rgba(255, 72, 72, 0.4);
         }
 
         .flow-steps-legend .step-num.mcp {
-          background: rgba(157, 78, 221, 0.2);
-          color: #9d4edd;
-          border: 1px solid rgba(157, 78, 221, 0.4);
+          background: rgba(172, 36, 34, 0.2);
+          color: #AC2422;
+          border: 1px solid rgba(172, 36, 34, 0.4);
         }
 
         /* Right legend for Firebolt MCP flow */
@@ -1576,7 +1576,7 @@ export default function App() {
           top: 20px;
           right: 20px;
           background: rgba(10, 10, 15, 0.95);
-          border: 1px solid rgba(157, 78, 221, 0.3);
+          border: 1px solid rgba(172, 36, 34, 0.3);
           border-radius: 12px;
           padding: 16px;
           z-index: 10;
@@ -1603,7 +1603,7 @@ export default function App() {
           line-height: 1.5;
           margin-bottom: 12px;
           padding-bottom: 12px;
-          border-bottom: 1px solid rgba(157, 78, 221, 0.2);
+          border-bottom: 1px solid rgba(172, 36, 34, 0.2);
         }
 
         .flow-steps-legend-right .legend-steps {
@@ -1632,15 +1632,15 @@ export default function App() {
           font-weight: 700;
           font-family: var(--font-mono);
           flex-shrink: 0;
-          background: rgba(157, 78, 221, 0.2);
-          color: #9d4edd;
-          border: 1px solid rgba(157, 78, 221, 0.4);
+          background: rgba(172, 36, 34, 0.2);
+          color: #AC2422;
+          border: 1px solid rgba(172, 36, 34, 0.4);
         }
 
         .flow-steps-legend-right .legend-use-cases {
           margin-top: 12px;
           padding-top: 12px;
-          border-top: 1px solid rgba(157, 78, 221, 0.2);
+          border-top: 1px solid rgba(172, 36, 34, 0.2);
         }
 
         .flow-steps-legend-right .use-case-title {
@@ -1729,28 +1729,28 @@ export default function App() {
 
         .flow-node.cursor-node {
           border-color: var(--accent-cyan);
-          box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+          box-shadow: 0 0 20px rgba(247, 42, 48, 0.2);
         }
 
         .flow-node.fml-node {
           border-color: var(--accent-fire);
-          box-shadow: 0 0 20px rgba(255, 77, 0, 0.2);
+          box-shadow: 0 0 20px rgba(247, 42, 48, 0.2);
         }
 
         .flow-node.ollama-node,
         .flow-node.embed-node {
           border-color: var(--accent-green);
-          box-shadow: 0 0 15px rgba(0, 255, 136, 0.15);
+          box-shadow: 0 0 15px rgba(255, 72, 72, 0.15);
         }
 
         .flow-node.firebolt-node {
           border-color: var(--accent-fire);
-          box-shadow: 0 0 15px rgba(255, 77, 0, 0.15);
+          box-shadow: 0 0 15px rgba(247, 42, 48, 0.15);
         }
 
         .flow-node.firebolt-mcp-node {
           border-color: var(--accent-purple);
-          box-shadow: 0 0 15px rgba(157, 78, 221, 0.15);
+          box-shadow: 0 0 15px rgba(172, 36, 34, 0.15);
         }
 
         .node-icon {
@@ -1945,12 +1945,12 @@ export default function App() {
         }
 
         .location-badge.local {
-          background: rgba(0, 255, 136, 0.15);
+          background: rgba(255, 72, 72, 0.15);
           color: var(--accent-green);
         }
 
         .location-badge.cloud {
-          background: rgba(157, 78, 221, 0.15);
+          background: rgba(172, 36, 34, 0.15);
           color: var(--accent-purple);
         }
 

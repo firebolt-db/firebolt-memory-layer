@@ -1,30 +1,45 @@
 :root {
-  /* Cyberpunk-inspired color palette */
-  --bg-primary: #0a0a0f;
-  --bg-secondary: #12121a;
-  --bg-card: #1a1a25;
-  --bg-card-hover: #22222f;
+  /* Firebolt Brand Color Palette */
+  --bg-primary: #0E0202;
+  --bg-secondary: #1A0404;
+  --bg-card: #332621;
+  --bg-card-hover: #443733;
   
-  --accent-fire: #ff4d00;
-  --accent-fire-glow: rgba(255, 77, 0, 0.3);
-  --accent-cyan: #00f0ff;
-  --accent-cyan-glow: rgba(0, 240, 255, 0.2);
-  --accent-purple: #9d4edd;
-  --accent-green: #00ff88;
-  --accent-yellow: #ffd60a;
+  /* Primary Firebolt Red */
+  --accent-fire: #F72A30;
+  --accent-fire-glow: rgba(247, 42, 48, 0.3);
+  --accent-fire-dark: #AC2422;
+  --accent-fire-light: #FF4848;
   
-  --text-primary: #f0f0f5;
-  --text-secondary: #8888a0;
-  --text-muted: #555566;
+  /* Secondary accents - using Firebolt neutrals */
+  --accent-cyan: #F72A30;
+  --accent-cyan-glow: rgba(247, 42, 48, 0.2);
+  --accent-purple: #AC2422;
+  --accent-green: #FF4848;
+  --accent-yellow: #FFF2F3;
   
+  /* Text colors from Firebolt palette */
+  --text-primary: #E5E1E1;
+  --text-secondary: #998A85;
+  --text-muted: #665555;
+  
+  /* Borders */
   --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-accent: rgba(255, 77, 0, 0.4);
+  --border-accent: rgba(247, 42, 48, 0.4);
   
-  --font-display: 'Outfit', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* Firebolt Typography */
+  --font-display: 'Poppins', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'Roboto Mono', monospace;
   
-  --shadow-glow: 0 0 30px rgba(255, 77, 0, 0.15);
+  /* Effects */
+  --shadow-glow: 0 0 30px rgba(247, 42, 48, 0.15);
   --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.4);
+  
+  /* Firebolt-specific surface colors */
+  --surface-light: #F5EBEB;
+  --surface-lighter: #FFF2F3;
+  --firebolt-black: #1A0404;
 }
 
 * {
@@ -34,14 +49,18 @@
 }
 
 body {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   background: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
   line-height: 1.5;
 }
 
-/* Animated background gradient */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+/* Animated background gradient - Firebolt brand colors */
 body::before {
   content: '';
   position: fixed;
@@ -50,9 +69,9 @@ body::before {
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(ellipse at 20% 20%, rgba(255, 77, 0, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.05) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 50%, rgba(157, 78, 221, 0.03) 0%, transparent 60%);
+    radial-gradient(ellipse at 20% 20%, rgba(247, 42, 48, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(172, 36, 34, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(255, 72, 72, 0.04) 0%, transparent 60%);
   pointer-events: none;
   z-index: -1;
 }
