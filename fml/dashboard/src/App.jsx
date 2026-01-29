@@ -1207,9 +1207,9 @@ export default function App() {
             delay={200}
           />
           <StatCard 
-            title="Storage Size" 
+            title="Memory Data Size" 
             value={safeStats.memory?.storage?.total_uncompressed_formatted || '0 B'}
-            subtitle={`${safeStats.memory?.storage?.total_compressed_formatted || '0 B'} on disk`}
+            subtitle={`Raw data size before compression · ${safeStats.memory?.storage?.total_compressed_formatted || '0 B'} actual disk usage`}
             icon="💾"
             color="green"
             delay={250}
