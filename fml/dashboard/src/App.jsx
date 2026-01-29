@@ -1032,6 +1032,7 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [lastUpdate, setLastUpdate] = useState(null)
   const [brainConfig, setBrainConfig] = useState(null)
+  const [versionInfo, setVersionInfo] = useState(null)
 
   const fetchConfig = useCallback(async () => {
     try {
@@ -1039,6 +1040,18 @@ export default function App() {
       if (response.ok) {
         const data = await response.json()
         setBrainConfig(data)
+      }
+    } catch (e) {
+      // API not available
+    }
+  }, [])
+
+  const fetchVersion = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_BASE}/version`)
+      if (response.ok) {
+        const data = await response.json()
+        setVersionInfo(data)
       }
     } catch (e) {
       // API not available
@@ -1083,15 +1096,17 @@ export default function App() {
     fetchStats()
     fetchCalls()
     fetchConfig()
+    fetchVersion()
     
     // Refresh every 5 seconds
     const interval = setInterval(() => {
       fetchStats()
       fetchCalls()
+      fetchVersion()  // Check if server needs restart
     }, 5000)
 
     return () => clearInterval(interval)
-  }, [fetchStats, fetchCalls, fetchConfig])
+  }, [fetchStats, fetchCalls, fetchConfig, fetchVersion])
 
   const formatUptime = (seconds) => {
     const hrs = Math.floor(seconds / 3600)
@@ -1176,6 +1191,22 @@ export default function App() {
           )}
         </div>
       </header>
+
+      {/* Server Restart Warning Banner */}
+      {versionInfo?.needs_restart && (
+        <div className="restart-warning">
+          <span className="warning-icon">⚠️</span>
+          <div className="warning-content">
+            <strong>Server Running Stale Code</strong>
+            <span>The HTTP API server needs to be restarted to pick up code changes.</span>
+            <span className="warning-details">
+              Code modified: {new Date(versionInfo.code_modified_time).toLocaleString()} · 
+              Server started: {new Date(versionInfo.server_start_time).toLocaleString()}
+            </span>
+          </div>
+          <code className="restart-command">pkill -f "python.*http_api" && cd fml/fml-server && PYTHONPATH=. python3 -m src.http_api &</code>
+        </div>
+      )}
 
       {/* Main Content */}
       <main className="dashboard-content">
@@ -1296,6 +1327,60 @@ export default function App() {
           padding: 24px 0;
           border-bottom: 1px solid var(--border-subtle);
           margin-bottom: 32px;
+        }
+
+        .restart-warning {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding: 16px 20px;
+          margin-bottom: 24px;
+          background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 152, 0, 0.1));
+          border: 1px solid rgba(255, 193, 7, 0.4);
+          border-radius: 12px;
+          animation: pulse-warning 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-warning {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.2); }
+          50% { box-shadow: 0 0 20px 4px rgba(255, 193, 7, 0.3); }
+        }
+
+        .restart-warning .warning-icon {
+          font-size: 24px;
+        }
+
+        .restart-warning .warning-content {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          flex: 1;
+        }
+
+        .restart-warning .warning-content strong {
+          color: #ff9800;
+          font-size: 14px;
+        }
+
+        .restart-warning .warning-content span {
+          color: var(--text-secondary);
+          font-size: 12px;
+        }
+
+        .restart-warning .warning-details {
+          color: var(--text-muted);
+          font-size: 11px;
+        }
+
+        .restart-warning .restart-command {
+          background: rgba(0, 0, 0, 0.2);
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-size: 10px;
+          color: var(--text-muted);
+          max-width: 400px;
+          overflow-x: auto;
+          white-space: nowrap;
         }
 
         .header-left {

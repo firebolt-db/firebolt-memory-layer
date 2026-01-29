@@ -325,6 +325,28 @@ Memories are auto-classified into human-aligned categories:
 3. Check MCP config path is correct in `~/.cursor/mcp.json`
 4. Restart Cursor completely (Cmd+Q)
 
+### Dashboard showing incorrect/stale data
+The HTTP API server (used by the dashboard) doesn't auto-reload when code changes. If you see:
+- Incorrect "All-Time Calls" counts (e.g., showing 4 instead of hundreds)
+- Missing data in sections (Recent LLM Calls empty, Memory Data Size showing 0)
+- Features not working that should be implemented
+
+**Solution:** Check if the server needs a restart:
+```bash
+# Check server sync status
+curl http://localhost:8082/api/version
+
+# If "needs_restart": true, restart the server:
+pkill -f "python.*http_api"
+cd fml/fml-server
+source .venv/bin/activate
+PYTHONPATH=. python -m src.http_api &
+```
+
+The dashboard will also show a yellow warning banner when the server is running stale code, with the restart command included.
+
+**Why this happens:** The `http_api` server is a separate Python process that loads code once at startup. Unlike the MCP server (which restarts with each Cursor session), the HTTP API runs continuously. After code changes, the running server still has the old code in memory until manually restarted.
+
 ### "tuple index out of range" error
 This usually means the database is empty or the vector index doesn't exist. Run:
 ```bash

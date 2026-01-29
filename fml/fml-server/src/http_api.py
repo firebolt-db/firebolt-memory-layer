@@ -8,12 +8,19 @@ Run with: python -m src.http_api
 """
 
 import json
+import os
+from datetime import datetime
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
 from src.db.client import db
 from src.metrics import metrics
 from src.config import config
+
+# Capture server start time and code file modification time for sync detection
+_SERVER_START_TIME = datetime.now()
+_CODE_FILE_PATH = os.path.abspath(__file__)
+_CODE_MTIME = datetime.fromtimestamp(os.path.getmtime(_CODE_FILE_PATH))
 
 
 class DashboardAPIHandler(BaseHTTPRequestHandler):
@@ -53,6 +60,8 @@ class DashboardAPIHandler(BaseHTTPRequestHandler):
                 self.handle_analytics(query)
             elif path == '/api/config':
                 self.handle_config()
+            elif path == '/api/version':
+                self.handle_version()
             elif path == '/api/health':
                 self.send_json({"status": "ok"})
             else:
@@ -220,14 +229,15 @@ class DashboardAPIHandler(BaseHTTPRequestHandler):
             storage_stats = {"total_compressed": 0, "total_uncompressed": 0, "tables": {}}
             try:
                 tables_result = db.execute("SHOW TABLES")
-                # SHOW TABLES columns: 0=table_name, 1=state, 2=table_type, 3=column_count,
-                # 4=primary_index, 5=schema, 6=number_of_rows, 7=size(compressed), 8=size_uncompressed
+                # SHOW TABLES columns (Firebolt Core):
+                # 0=table_name, 1=table_type, 2=column_count, 3=primary_index, 4=create_statement,
+                # 5=number_of_rows, 6=size_compressed, 7=size_uncompressed, 8=compression_ratio, 9=?
                 for row in tables_result:
                     table_name = row[0]
                     if table_name in FML_TABLES:
-                        row_count = int(row[6]) if row[6] else 0
-                        compressed = row[7] if row[7] else "0 B"
-                        uncompressed = row[8] if row[8] else "0 B"
+                        row_count = int(row[5]) if row[5] else 0
+                        compressed = row[6] if row[6] else "0 B"
+                        uncompressed = row[7] if row[7] else "0 B"
                         
                         # Parse size strings like "75.70 KiB" to bytes
                         def parse_size(size_str):
@@ -300,7 +310,41 @@ class DashboardAPIHandler(BaseHTTPRequestHandler):
     def handle_calls(self, service, query):
         """Get recent calls for a service."""
         limit = int(query.get('limit', [50])[0])
-        calls = metrics.get_recent_calls(service, limit)
+        
+        # First try to get from database (persisted across restarts)
+        calls = []
+        try:
+            result = db.execute(f"""
+                SELECT 
+                    recorded_at,
+                    operation,
+                    latency_ms,
+                    tokens_in,
+                    tokens_out,
+                    success,
+                    error_msg
+                FROM service_metrics
+                WHERE service = '{service}'
+                ORDER BY recorded_at DESC
+                LIMIT {limit}
+            """)
+            
+            calls = [
+                {
+                    "timestamp": str(row[0]),
+                    "operation": row[1],
+                    "latency_ms": round(float(row[2]), 2),
+                    "tokens_in": int(row[3]) if row[3] else 0,
+                    "tokens_out": int(row[4]) if row[4] else 0,
+                    "success": row[5] if isinstance(row[5], bool) else str(row[5]).lower() == 'true',
+                    "error": row[6],
+                }
+                for row in result
+            ]
+        except Exception:
+            # Fall back to in-memory metrics
+            calls = metrics.get_recent_calls(service, limit)
+        
         self.send_json({
             "service": service,
             "call_count": len(calls),
@@ -322,6 +366,27 @@ class DashboardAPIHandler(BaseHTTPRequestHandler):
                 "model": config.ollama.model,
                 "embedding_model": config.ollama.embedding_model,
             }
+        })
+
+    def handle_version(self):
+        """Get server version info and detect code sync issues.
+        
+        Returns server start time, code modification time, and whether
+        the server needs a restart to pick up code changes.
+        """
+        # Re-check file mtime in case it changed
+        current_mtime = datetime.fromtimestamp(os.path.getmtime(_CODE_FILE_PATH))
+        
+        # Server needs restart if code was modified after server started
+        needs_restart = current_mtime > _SERVER_START_TIME
+        
+        self.send_json({
+            "server_start_time": _SERVER_START_TIME.isoformat(),
+            "code_modified_time": current_mtime.isoformat(),
+            "code_loaded_time": _CODE_MTIME.isoformat(),
+            "needs_restart": needs_restart,
+            "uptime_seconds": (datetime.now() - _SERVER_START_TIME).total_seconds(),
+            "message": "Server is running stale code - restart required!" if needs_restart else "Server is up to date",
         })
 
     def handle_analytics(self, query):
