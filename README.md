@@ -2,6 +2,12 @@
 
 An intelligent, persistent memory system for LLM agents using local Firebolt Core with HNSW vector search. Designed to give Cursor (and other MCP-compatible tools) long-term memory that persists across sessions.
 
+## Credits
+
+**Core Author:** [John Tuite](https://github.com/tuitejc-firebolt) - The FML MCP server architecture and implementation is John's work. This project builds upon his foundational design for intelligent memory management in LLM agents.
+
+---
+
 ## What This Does
 
 - **Working Memory**: Session-scoped context that persists during a conversation
