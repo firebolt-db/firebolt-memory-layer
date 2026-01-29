@@ -18,12 +18,13 @@ def test_api_key_detection():
     
     test_cases = [
         # (content, should_block, description)
-        ("sk-1234567890abcdefghijklmnop", True, "OpenAI API key"),
-        ("sk-proj-abc123def456-xyz789_test_key", True, "OpenAI project key"),
-        ("ghp_1234567890abcdefghijklmnopqrstuvwxyz12", True, "GitHub PAT"),
-        ("AKIAIOSFODNN7EXAMPLE", True, "AWS Access Key"),
-        ("AIzaSyDaGmWKa4JsXZ-HjGw7ISLn_3namBGewQe", True, "Google API Key"),
-        ("sk-ant-api03-abcdef123456", True, "Anthropic API Key"),
+        # NOTE: These are FAKE test patterns using XXXX placeholders - NOT real keys
+        ("sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXX", True, "OpenAI API key"),
+        ("sk-proj-XXXXXXXXXXXXXXXXXXXXXXXX", True, "OpenAI project key"),
+        ("ghp_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", True, "GitHub PAT"),
+        ("AKIAXXXXXXXXXXXX0000", True, "AWS Access Key"),
+        ("AIzaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", True, "Google API Key"),
+        ("sk-ant-XXXXXXXXXXXXXXXXXXXX", True, "Anthropic API Key"),
         ("The API key format is sk-xxxx", False, "Mention of format (no actual key)"),
         ("Use your OpenAI key from the dashboard", False, "Safe reference"),
     ]
@@ -93,10 +94,11 @@ def test_token_detection():
     print("\n=== Testing Token Detection ===\n")
     
     test_cases = [
-        ("Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U", 
+        # NOTE: These are FAKE test patterns using XXXX placeholders - NOT real tokens
+        ("Bearer eyXXXXXXXXXXXXXXXXXXXXXXXX.XXXXXXXXXXXXXXXXXXXXXXXX.XXXXXXXXXXXXXXXXXXXXXXXX", 
          True, "Bearer token with JWT"),
-        ("Authorization: Bearer abc123def456ghi789jkl012mno345", True, "Auth header"),
-        ("xoxb-123456789012-1234567890123-AbCdEfGhIjKlMnOpQrStUvWx", True, "Slack token"),
+        ("Authorization: Bearer XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", True, "Auth header"),
+        ("xoxb-XXXXXXXXXXXX-XXXXXXXXXXXXX-XXXXXXXXXXXXXXXXXXXXXXXX", True, "Slack token"),
         ("Use bearer token authentication", False, "Safe discussion"),
     ]
     
@@ -197,14 +199,15 @@ def test_redaction():
     """Test content redaction functionality."""
     print("\n=== Testing Content Redaction ===\n")
     
-    content = "Use API key sk-1234567890abcdefghijklmnop and token ghp_abcdef123456789012345678901234567890"
+    # NOTE: These are FAKE test patterns using XXXX placeholders - NOT real keys
+    content = "Use API key sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXX and token ghp_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
     redacted = redact_sensitive_content(content)
     
     print(f"Original: {content}")
     print(f"Redacted: {redacted}")
     
     # Check that sensitive patterns are removed
-    if "sk-1234" not in redacted and "ghp_" not in redacted:
+    if "sk-XXXX" not in redacted and "ghp_" not in redacted:
         print("✅ PASS: Sensitive content was redacted")
         return 1, 0
     else:
