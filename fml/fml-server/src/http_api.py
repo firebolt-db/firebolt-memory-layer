@@ -173,12 +173,14 @@ class DashboardAPIHandler(BaseHTTPRequestHandler):
             storage_stats = {"total_compressed": 0, "total_uncompressed": 0, "tables": {}}
             try:
                 tables_result = db.execute("SHOW TABLES")
+                # SHOW TABLES columns: 0=table_name, 1=state, 2=table_type, 3=column_count,
+                # 4=primary_index, 5=schema, 6=number_of_rows, 7=size(compressed), 8=size_uncompressed
                 for row in tables_result:
                     table_name = row[0]
                     if table_name in FML_TABLES:
-                        row_count = int(row[5]) if row[5] else 0
-                        compressed = row[6] if row[6] else "0 B"
-                        uncompressed = row[7] if row[7] else "0 B"
+                        row_count = int(row[6]) if row[6] else 0
+                        compressed = row[7] if row[7] else "0 B"
+                        uncompressed = row[8] if row[8] else "0 B"
                         
                         # Parse size strings like "75.70 KiB" to bytes
                         def parse_size(size_str):
