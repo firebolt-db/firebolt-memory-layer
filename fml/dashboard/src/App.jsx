@@ -1208,8 +1208,8 @@ export default function App() {
           />
           <StatCard 
             title="Storage Size" 
-            value={safeStats.memory?.storage?.total_compressed_formatted || '0 B'}
-            subtitle={`${safeStats.memory?.storage?.total_uncompressed_formatted || '0 B'} uncompressed`}
+            value={safeStats.memory?.storage?.total_uncompressed_formatted || '0 B'}
+            subtitle={`${safeStats.memory?.storage?.total_compressed_formatted || '0 B'} on disk`}
             icon="💾"
             color="green"
             delay={250}
@@ -1710,20 +1710,19 @@ export default function App() {
           stroke-linejoin: round;
         }
 
-        /* Flow Nodes */
+        /* Flow Nodes - Light mode */
         .flow-node {
-          background: rgba(20, 20, 30, 0.95);
-          border: 2px solid rgba(26, 4, 4, 0.12);
+          background: rgba(255, 255, 255, 0.98);
+          border: 2px solid rgba(26, 4, 4, 0.15);
           border-radius: 12px;
           padding: 20px 24px;
           text-align: center;
-          backdrop-filter: blur(8px);
           position: absolute;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 4px 16px rgba(26, 4, 4, 0.08);
           gap: 8px;
         }
 
