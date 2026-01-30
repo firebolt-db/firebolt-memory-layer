@@ -87,6 +87,74 @@ Before starting multi-step tasks, call `get_relevant_context` to assemble:
 - Long-term memories (past learnings)
 - Related project context
 
+## 🔁 LEARNING LOOP: Blocks & Issues (MANDATORY)
+
+When you encounter ANY block, error, or permission issue, follow this protocol:
+
+### Step 1: Check FML First
+**BEFORE** trying to solve the issue yourself:
+```
+recall_memories(user_id="johnkennedy", query="<error message or issue description>")
+```
+Look for past solutions, workarounds, or troubleshooting steps.
+
+### Step 2: If FML Has Solution
+- Apply the solution from memory
+- Note: "Found solution in FML memory" (no need to announce unless relevant)
+
+### Step 3: If FML Doesn't Have Solution
+After resolving the issue:
+```
+store_memory(
+    user_id="johnkennedy",
+    content="[Issue]: <brief description>\n[Solution]: <what fixed it>\n[Pre-check]: <how to avoid in future>",
+    memory_category="procedural",
+    memory_subtype="troubleshooting",
+    importance=0.9,
+    entities="error:<error_type>,tool:<relevant_tool>"
+)
+```
+
+### Step 4: Track Recurring Issues
+For EVERY block/issue encountered, log it to working memory:
+```
+add_to_working_memory(
+    session_id="...",
+    content="ISSUE_LOG: <issue_type> | <brief_description> | <resolution>",
+    content_type="scratchpad"
+)
+```
+
+### Step 5: Three-Strike Rule
+When you encounter the SAME type of issue for the **3rd time** (check FML for count):
+1. **STOP** and notify the user:
+   > "I've encountered this issue 3 times now: [issue description]. Would you like me to add a pre-hook or sanity check to prevent this in future sessions?"
+2. If user agrees, create a procedural memory with:
+   - Pre-check steps to run BEFORE the task
+   - Validation criteria
+   - Automatic remediation steps
+
+### Common Pre-Hook Patterns
+
+| Issue Type | Pre-Hook Check |
+|------------|----------------|
+| Permission denied (GitHub) | `gh api user` to verify auth, check org membership |
+| Server running stale code | Check `/api/version` endpoint for `needs_restart` |
+| Module not found | Verify venv activated, check PYTHONPATH |
+| Database connection failed | Test connection with simple query first |
+| Git push rejected | Run `git status`, check remote exists |
+
+### Example Pre-Hook Memory
+```
+store_memory(
+    content="PRE-HOOK: GitHub Org Repo Creation\n\nBefore attempting to create repo in an org:\n1. Check membership: gh api user/memberships/orgs/<org>\n2. Check create permission: look for 'admin' or 'maintain' role\n3. If member but no create rights, inform user they need to create manually or request permission\n\nThis avoids the 'does not have correct permissions to execute CreateRepository' error.",
+    memory_category="procedural",
+    memory_subtype="pattern",
+    importance=0.95,
+    entities="tool:github,tool:gh-cli,error:permission"
+)
+```
+
 ## Memory Categories
 
 | Category | Use For |
