@@ -24,8 +24,8 @@ For the fastest setup, use the bootstrap script after cloning:
 
 ```bash
 # Clone the repository
-git clone git@github.com:johnkennedy-cmyk/Firebolt-Memory-Layer.git
-cd Firebolt-Memory-Layer
+git clone git@github.com:firebolt-db/firebolt-memory-layer.git
+cd firebolt-memory-layer
 
 # Ensure Firebolt Core and Ollama are running first (see Prerequisites below)
 
@@ -97,8 +97,8 @@ Firebolt Core runs at `http://localhost:3473` by default.
 
 ```bash
 # Clone this repository
-git clone git@github.com:johnkennedy-cmyk/Firebolt-Memory-Layer.git
-cd Firebolt-Memory-Layer
+git clone git@github.com:firebolt-db/firebolt-memory-layer.git
+cd firebolt-memory-layer
 
 # Create Python virtual environment
 cd fml/fml-server
@@ -191,11 +191,11 @@ Create or edit `~/.cursor/mcp.json`:
 {
   "mcpServers": {
     "fml": {
-      "command": "/path/to/Firebolt-Memory-Layer/fml/fml-server/.venv/bin/python",
+      "command": "/path/to/firebolt-memory-layer/fml/fml-server/.venv/bin/python",
       "args": ["-m", "src.server"],
-      "cwd": "/path/to/Firebolt-Memory-Layer/fml/fml-server",
+      "cwd": "/path/to/firebolt-memory-layer/fml/fml-server",
       "env": {
-        "PYTHONPATH": "/path/to/Firebolt-Memory-Layer/fml/fml-server"
+        "PYTHONPATH": "/path/to/firebolt-memory-layer/fml/fml-server"
       }
     }
   }
@@ -209,11 +209,11 @@ Example for typical setup:
 {
   "mcpServers": {
     "fml": {
-      "command": "/Users/YOUR_USERNAME/DevelopmentArea/Firebolt-Memory-Layer/fml/fml-server/.venv/bin/python",
+      "command": "/Users/YOUR_USERNAME/DevelopmentArea/firebolt-memory-layer/fml/fml-server/.venv/bin/python",
       "args": ["-m", "src.server"],
-      "cwd": "/Users/YOUR_USERNAME/DevelopmentArea/Firebolt-Memory-Layer/fml/fml-server",
+      "cwd": "/Users/YOUR_USERNAME/DevelopmentArea/firebolt-memory-layer/fml/fml-server",
       "env": {
-        "PYTHONPATH": "/Users/YOUR_USERNAME/DevelopmentArea/Firebolt-Memory-Layer/fml/fml-server"
+        "PYTHONPATH": "/Users/YOUR_USERNAME/DevelopmentArea/firebolt-memory-layer/fml/fml-server"
       }
     }
   }
@@ -413,11 +413,11 @@ To run both servers, update your `~/.cursor/mcp.json`:
 {
   "mcpServers": {
     "fml": {
-      "command": "/path/to/Firebolt-Memory-Layer/fml/fml-server/.venv/bin/python",
+      "command": "/path/to/firebolt-memory-layer/fml/fml-server/.venv/bin/python",
       "args": ["-m", "src.server"],
-      "cwd": "/path/to/Firebolt-Memory-Layer/fml/fml-server",
+      "cwd": "/path/to/firebolt-memory-layer/fml/fml-server",
       "env": {
-        "PYTHONPATH": "/path/to/Firebolt-Memory-Layer/fml/fml-server"
+        "PYTHONPATH": "/path/to/firebolt-memory-layer/fml/fml-server"
       }
     },
     "firebolt": {
@@ -450,7 +450,7 @@ Both servers connect to the same Firebolt Core instance, so your memory data and
 ## Project Structure
 
 ```
-Firebolt-Memory-Layer/
+firebolt-memory-layer/
 ├── fml/
 │   ├── fml-server/              # Core MCP server (Python)
 │   │   ├── src/
