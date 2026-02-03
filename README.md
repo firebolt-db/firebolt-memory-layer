@@ -1,6 +1,6 @@
 # Firebolt Memory Layer (FML)
 
-An intelligent, persistent memory system for LLM agents using local Firebolt Core with HNSW vector search. Designed to give Cursor (and other MCP-compatible tools) long-term memory that persists across sessions.
+An intelligent, persistent memory system for LLM agents using local Firebolt Core with HNSW vector search. Designed to give Cursor, Claude Code, Antigravity Codes, and other MCP-compatible tools long-term memory that persists across sessions. **Includes setup instructions for Antigravity Codes, Claude Code, Google Gemini, and Cursor IDE.**
 
 ## Credits
 
@@ -19,6 +19,8 @@ An intelligent, persistent memory system for LLM agents using local Firebolt Cor
 ---
 
 ## Quick Start (Recommended)
+
+**Multi-Platform Support:** FML works with Cursor IDE, Claude Code, Antigravity Codes, Google Gemini, and any MCP-compatible client. See the [Platform Setup Guide](fml/fml-server/docs/MCP_PLATFORM_SETUP.md) for platform-specific instructions.
 
 For the fastest setup, use the bootstrap script after cloning:
 
