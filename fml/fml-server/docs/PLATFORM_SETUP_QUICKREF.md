@@ -49,6 +49,7 @@ FML (Firebolt Memory Layer) is an MCP server that works with **any MCP-compatibl
 - [ ] Ollama running (`curl http://localhost:11434/api/tags`)
 - [ ] `.env` file configured (see `config/env.example`)
 - [ ] Database migrated (`python scripts/migrate.py`)
+- [ ] **Dashboard setup** (recommended for heavy usage - see below)
 
 ## Antigravity Codes
 
@@ -73,6 +74,21 @@ After configuration, restart your MCP client:
 
 **Note:** Most MCP clients require a full restart - no reload command available.
 
+## Monitoring Dashboard (Recommended)
+
+FML includes a **local monitoring dashboard** - critical for ongoing heavy usage. It provides real-time monitoring, troubleshooting, and analytics.
+
+**Quick Start:**
+```bash
+# Terminal 1: HTTP API
+cd fml/fml-server && source .venv/bin/activate && python -m src.http_api
+
+# Terminal 2: Dashboard UI  
+cd fml/dashboard && npm install && npm run dev
+```
+
+Access at `http://localhost:5174` - essential for production use and troubleshooting.
+
 ## Verification
 
 After restarting your MCP client:
@@ -80,6 +96,7 @@ After restarting your MCP client:
 1. Test connection: `init_session` tool should be available
 2. Test memory: `store_memory` and `recall_memories` should work
 3. Verify tools appear in your client's tool list
+4. **Monitor via dashboard** (if running) to track performance and troubleshoot issues
 
 ## Troubleshooting
 

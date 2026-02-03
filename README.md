@@ -15,6 +15,7 @@ An intelligent, persistent memory system for LLM agents using local Firebolt Cor
 - **Auto-Classification**: Memories are automatically categorized (episodic, semantic, procedural, preference)
 - **Semantic Recall**: Find relevant memories based on meaning, not just keywords
 - **100% Local**: Runs entirely on your machine using Firebolt Core + Ollama (no cloud dependencies)
+- **Monitoring Dashboard**: Built-in local UI for real-time monitoring, troubleshooting, and analytics - **critical for ongoing heavy usage**
 
 ---
 
@@ -44,6 +45,8 @@ The bootstrap script will:
 - Set up pre-commit security hooks
 
 After bootstrap completes, **restart your MCP client** (Cursor IDE: Cmd+Q, Claude Code: quit and reopen, Gemini CLI: restart) and start chatting!
+
+**💡 Tip:** For heavy usage, start the monitoring dashboard (see Dashboard section below) to track performance and troubleshoot issues in real-time.
 
 ---
 
@@ -348,6 +351,7 @@ Memories are auto-classified into human-aligned categories:
    - **Cursor IDE**: Cmd+Q (Mac) or quit and reopen
    - **Claude Code**: Quit application completely and reopen
    - **Google Gemini CLI**: Restart the CLI
+5. **Use the dashboard** (if running): Check `http://localhost:5174` for real-time error logs, connection status, and system health metrics
 
 ### Dashboard showing incorrect/stale data
 The HTTP API server (used by the dashboard) doesn't auto-reload when code changes. If you see:
@@ -388,26 +392,33 @@ Firebolt Core only allows one write transaction at a time. The FML server uses a
 
 ---
 
-## Dashboard (Optional)
+## Dashboard (Recommended for Heavy Usage)
 
-FML includes a React dashboard for monitoring:
+FML includes a **local monitoring dashboard** - a React-based UI that provides real-time insights into your memory system. **This is critical for ongoing heavy usage** as it helps you:
+
+- **Monitor performance**: Track API call rates, response times, and system health
+- **Troubleshoot issues**: Identify errors, connection problems, and configuration issues
+- **Analyze usage patterns**: View memory distribution, access patterns, and user activity
+- **Track memory growth**: Monitor database size, memory counts, and storage usage
+- **Debug problems**: Inspect recent calls, error logs, and system status
+
+### Quick Start
 
 ```bash
-cd fml/dashboard
-npm install
-npm run dev
-```
-
-Also start the HTTP API:
-```bash
+# Start the HTTP API (required for dashboard)
 cd fml/fml-server
 source .venv/bin/activate
-python -m src.http_api
+python -m src.http_api  # Runs on http://localhost:8082
+
+# In another terminal, start the dashboard
+cd fml/dashboard
+npm install
+npm run dev  # Runs on http://localhost:5174
 ```
 
-Dashboard runs at `http://localhost:5174`
+Open `http://localhost:5174` in your browser to access the dashboard.
 
-The dashboard visualizes both the FML memory flow and the optional Firebolt MCP query flow (see below).
+The dashboard visualizes both the FML memory flow and the optional Firebolt MCP query flow (see below), giving you complete visibility into your memory system's operation.
 
 ---
 

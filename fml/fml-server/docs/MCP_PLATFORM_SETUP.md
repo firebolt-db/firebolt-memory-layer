@@ -517,8 +517,39 @@ Should return list including `init_session`, `recall_memories`, etc.
 1. ✅ **Configure for your platform** using the examples above
 2. ✅ **Test basic connectivity** with `init_session` tool
 3. ✅ **Verify memory operations** with `store_memory` and `recall_memories`
-4. ✅ **Check platform-specific documentation** for any additional requirements
-5. ✅ **Consider publishing to Antigravity** if you want broader discoverability
+4. ✅ **Start the monitoring dashboard** (recommended for heavy usage) - see below
+5. ✅ **Check platform-specific documentation** for any additional requirements
+6. ✅ **Consider publishing to Antigravity** if you want broader discoverability
+
+---
+
+## Monitoring Dashboard (Recommended for Heavy Usage)
+
+FML includes a **local monitoring dashboard** that provides real-time insights into your memory system. **This is critical for ongoing heavy usage** as it helps you:
+
+- **Monitor performance**: Track API call rates, response times, and system health
+- **Troubleshoot issues**: Identify errors, connection problems, and configuration issues  
+- **Analyze usage patterns**: View memory distribution, access patterns, and user activity
+- **Track memory growth**: Monitor database size, memory counts, and storage usage
+- **Debug problems**: Inspect recent calls, error logs, and system status
+
+### Starting the Dashboard
+
+```bash
+# Terminal 1: Start the HTTP API (required for dashboard)
+cd fml/fml-server
+source .venv/bin/activate
+python -m src.http_api  # Runs on http://localhost:8082
+
+# Terminal 2: Start the dashboard UI
+cd fml/dashboard
+npm install  # First time only
+npm run dev  # Runs on http://localhost:5174
+```
+
+Open `http://localhost:5174` in your browser to access the dashboard.
+
+The dashboard provides complete visibility into your FML memory system's operation, making it essential for production use and heavy workloads.
 
 ---
 
