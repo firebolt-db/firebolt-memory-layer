@@ -2,6 +2,8 @@
 
 An intelligent, persistent memory system for LLM agents using local Firebolt Core with HNSW vector search. Designed to give Cursor, Claude Code, Antigravity Codes, and other MCP-compatible tools long-term memory that persists across sessions. **Includes setup instructions for Antigravity Codes, Claude Code, Google Gemini, and Cursor IDE.**
 
+**🔒 Security-First Mindset:** FML brings a security-first approach to AI IDE development, with built-in secret detection, credential protection, and privacy-focused architecture to keep sensitive data safe.
+
 ## Credits
 
 **Core Author:** [John Tuite](https://github.com/tuitejc-firebolt) - The FML MCP server architecture and implementation is John's work. This project builds upon his foundational design for intelligent memory management in LLM agents.
@@ -16,6 +18,7 @@ An intelligent, persistent memory system for LLM agents using local Firebolt Cor
 - **Semantic Recall**: Find relevant memories based on meaning, not just keywords
 - **100% Local**: Runs entirely on your machine using Firebolt Core + Ollama (no cloud dependencies)
 - **Monitoring Dashboard**: Built-in local UI for real-time monitoring, troubleshooting, and analytics - **critical for ongoing heavy usage**
+- **Security-First**: Built-in secret detection, credential protection, and privacy-focused architecture to keep sensitive data safe in AI IDE workflows
 
 ---
 
@@ -511,7 +514,7 @@ firebolt-memory-layer/
 
 ## Security
 
-FML implements multiple layers of security to protect sensitive data.
+FML implements multiple layers of security to protect sensitive data and brings a **security-first mindset to AI IDE development**. This ensures that sensitive information like API keys, credentials, and secrets are never accidentally stored in memory or exposed.
 
 ### Built-in Secret Detection
 

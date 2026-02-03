@@ -2,6 +2,8 @@
 
 An MCP server that provides intelligent memory management for LLM applications, using Firebolt as the data layer.
 
+**🔒 Security-First Mindset:** FML brings a security-first approach to AI IDE development, with built-in secret detection, credential protection, and privacy-focused architecture to keep sensitive data safe.
+
 ## Features
 
 - **Working Memory**: Fast, session-scoped storage for active context
@@ -12,6 +14,7 @@ An MCP server that provides intelligent memory management for LLM applications, 
   - Procedural (workflows, patterns)
   - Preference (communication style, tool preferences)
 - **Smart Retrieval**: Query-intent-aware context assembly
+- **Security-First**: Built-in secret detection and credential protection for AI IDE workflows
 
 ## Quick Start
 
