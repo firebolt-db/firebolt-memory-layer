@@ -43,7 +43,7 @@ The bootstrap script will:
 - Configure Cursor IDE with FML rules and MCP settings
 - Set up pre-commit security hooks
 
-After bootstrap completes, **restart Cursor** and start chatting!
+After bootstrap completes, **restart your MCP client** (Cursor IDE: Cmd+Q, Claude Code: quit and reopen, Gemini CLI: restart) and start chatting!
 
 ---
 
@@ -231,13 +231,20 @@ Example for typical setup:
 
 Configuration templates are available in `fml/fml-server/config/` directory.
 
-### Step 9: Add Global Cursor Rules
+### Step 9: Add Global Rules (Cursor IDE Only)
 
-Create `~/.cursor/rules/fml-memory.mdc` with the content from `cursor-rules/fml-memory.mdc` in this repo. This tells all Cursor agents to use FML automatically.
+**Note:** This step is specific to Cursor IDE. Other MCP clients (Claude Code, Gemini CLI) don't use separate rule files.
 
-### Step 10: Restart Cursor
+For Cursor IDE: Create `~/.cursor/rules/fml-memory.mdc` with the content from `cursor-rules/fml-memory.mdc` in this repo. This tells all Cursor agents to use FML automatically.
 
-After adding the MCP config and rules, restart Cursor completely (Cmd+Q, then reopen).
+### Step 10: Restart Your MCP Client
+
+After adding the MCP config and rules, restart your MCP client completely:
+
+- **Cursor IDE**: Quit completely (Cmd+Q on Mac, then reopen)
+- **Claude Code**: Quit the application completely and reopen
+- **Google Gemini CLI**: Restart the CLI (`gemini` command)
+- **Other MCP clients**: Restart the application completely
 
 ---
 
@@ -330,11 +337,17 @@ Memories are auto-classified into human-aligned categories:
 
 ## Troubleshooting
 
-### FML not responding in Cursor
+### FML not responding in your MCP client
 1. Check Firebolt Core is running: `curl http://localhost:3473/?output_format=TabSeparated -d "SELECT 1"`
 2. Check Ollama is running: `curl http://localhost:11434/api/tags`
-3. Check MCP config path is correct in `~/.cursor/mcp.json`
-4. Restart Cursor completely (Cmd+Q)
+3. Check MCP config path is correct:
+   - **Cursor IDE**: `~/.cursor/mcp.json`
+   - **Claude Code**: `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
+   - **Google Gemini CLI**: `~/.gemini/settings.json`
+4. Restart your MCP client completely:
+   - **Cursor IDE**: Cmd+Q (Mac) or quit and reopen
+   - **Claude Code**: Quit application completely and reopen
+   - **Google Gemini CLI**: Restart the CLI
 
 ### Dashboard showing incorrect/stale data
 The HTTP API server (used by the dashboard) doesn't auto-reload when code changes. If you see:
@@ -356,7 +369,7 @@ PYTHONPATH=. python -m src.http_api &
 
 The dashboard will also show a yellow warning banner when the server is running stale code, with the restart command included.
 
-**Why this happens:** The `http_api` server is a separate Python process that loads code once at startup. Unlike the MCP server (which restarts with each Cursor session), the HTTP API runs continuously. After code changes, the running server still has the old code in memory until manually restarted.
+**Why this happens:** The `http_api` server is a separate Python process that loads code once at startup. Unlike the MCP server (which restarts with each MCP client session), the HTTP API runs continuously. After code changes, the running server still has the old code in memory until manually restarted.
 
 ### "tuple index out of range" error
 This usually means the database is empty or the vector index doesn't exist. Run:

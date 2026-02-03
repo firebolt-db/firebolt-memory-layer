@@ -122,12 +122,18 @@ Key Tools:
         "importance": 0.85,
         "content": """FML Troubleshooting Guide:
 
-Problem: FML not responding in Cursor
+Problem: FML not responding in MCP client
 Solutions:
 1. Check Firebolt Core: curl http://localhost:3473/?output_format=PSQL -d "SELECT 1"
 2. Check Ollama: curl http://localhost:11434/api/tags
-3. Verify MCP config path in ~/.cursor/mcp.json
-4. Restart Cursor completely (Cmd+Q on Mac)
+3. Verify MCP config path:
+   - Cursor IDE: ~/.cursor/mcp.json
+   - Claude Code: ~/Library/Application Support/Claude/claude_desktop_config.json (macOS)
+   - Google Gemini CLI: ~/.gemini/settings.json
+4. Restart your MCP client:
+   - Cursor IDE: Cmd+Q (Mac) or quit and reopen
+   - Claude Code: Quit application completely and reopen
+   - Google Gemini CLI: Exit and restart (exit then gemini)
 
 Problem: "tuple index out of range" error
 Solution: Database empty or vector index missing. Run: python scripts/migrate.py

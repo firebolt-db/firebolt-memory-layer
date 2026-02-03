@@ -92,9 +92,19 @@ Add FML to your Claude Code configuration:
 }
 ```
 
+#### Restart Instructions
+
+After configuring FML, you must restart Claude Code completely for the changes to take effect:
+
+- **macOS**: Quit Claude Code (Cmd+Q) and reopen
+- **Windows**: Close Claude Code completely and reopen
+- **Linux**: Quit Claude Code completely and reopen
+
+**Note:** There is no reload command - a full application restart is required.
+
 #### Verification
 
-1. Restart Claude Code completely
+1. Restart Claude Code completely (quit and reopen)
 2. Open a new conversation
 3. Ask Claude: "What memory tools are available?"
 4. Claude should be able to call FML tools like `init_session`, `recall_memories`, etc.
@@ -167,8 +177,18 @@ If Google AI Studio or Gemini directly supports MCP:
 2. Use the same stdio configuration as Claude Code
 3. Ensure Python path is absolute and accessible
 
+#### Restart Instructions
+
+After configuring FML, you must restart the Gemini CLI for the changes to take effect:
+
+- **Gemini CLI**: Exit the CLI (Ctrl+C or `exit`) and restart with `gemini` command
+- **Google AI Studio**: If using web interface, refresh the page or restart the session
+
+**Note:** There is no reload command - a full restart is required. Configuration changes in `settings.json` are only picked up on startup.
+
 #### Verification
 
+- Restart the Gemini CLI (exit and restart)
 - Test MCP connection using Google's MCP test tools (if available)
 - Verify FML tools appear in Gemini's available tools list
 - Test basic operations: `init_session`, `recall_memories`
@@ -387,6 +407,7 @@ All MCP clients should support:
 3. Test server manually: `python -m src.server`
 4. Verify `.env` file exists and has correct values
 5. Check Firebolt Core and Ollama are running
+6. **Restart your MCP client** (see restart commands below)
 
 ### Issue: Tools Not Available
 
@@ -413,17 +434,42 @@ All MCP clients should support:
 **Claude Code:**
 - Check config file location matches your OS
 - Verify JSON syntax is valid
-- Restart Claude completely (not just reload)
+- **Restart Claude Code completely** (quit application and reopen - no reload command available)
 
-**Google/Gemini:**
+**Google/Gemini CLI:**
 - Verify MCP support is enabled (if available)
-- Check configuration file location
+- Check configuration file location (`~/.gemini/settings.json`)
+- **Restart Gemini CLI** (exit with Ctrl+C or `exit`, then restart with `gemini` command)
 - Test with simple MCP server first
 
+**Cursor IDE:**
+- Check config file location (`~/.cursor/mcp.json`)
+- Verify JSON syntax is valid
+- **Restart Cursor completely** (Cmd+Q on Mac, then reopen)
+
 **Antigravity:**
+- Antigravity is a directory, not a client - follow instructions for your specific client
 - Verify npm package structure (if published)
 - Check wrapper script handles Python correctly
 - Test installation on clean environment
+
+---
+
+## Restart Commands Reference
+
+After making MCP configuration changes, you must restart your MCP client:
+
+| Platform | Restart Command | Notes |
+|----------|----------------|-------|
+| **Cursor IDE** (macOS) | `Cmd+Q` then reopen | Full application quit required |
+| **Cursor IDE** (Windows/Linux) | Quit application, then reopen | Full application quit required |
+| **Claude Code** (macOS) | `Cmd+Q` then reopen | Full application quit required - no reload command |
+| **Claude Code** (Windows) | Close application, then reopen | Full application quit required |
+| **Claude Code** (Linux) | Quit application, then reopen | Full application quit required |
+| **Google Gemini CLI** | `exit` then `gemini` | Exit CLI and restart - no reload command |
+| **Google AI Studio** (Web) | Refresh page or restart session | Browser refresh may be sufficient |
+
+**Important:** Most MCP clients do not support hot-reloading of configuration. A full restart is required for changes to take effect.
 
 ---
 

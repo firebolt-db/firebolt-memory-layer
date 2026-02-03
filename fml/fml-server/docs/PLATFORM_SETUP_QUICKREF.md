@@ -60,13 +60,26 @@ To make FML discoverable via Antigravity Codes:
 
 See [MCP_PLATFORM_SETUP.md](MCP_PLATFORM_SETUP.md) for full details.
 
+## Restart Commands
+
+After configuration, restart your MCP client:
+
+| Platform | Restart Command |
+|----------|----------------|
+| **Cursor IDE** (macOS) | `Cmd+Q` then reopen |
+| **Cursor IDE** (Windows/Linux) | Quit application, then reopen |
+| **Claude Code** (all platforms) | Quit application completely, then reopen |
+| **Google Gemini CLI** | `exit` then `gemini` |
+
+**Note:** Most MCP clients require a full restart - no reload command available.
+
 ## Verification
 
-After configuration:
+After restarting your MCP client:
 
-1. Restart your MCP client completely
-2. Test connection: `init_session` tool should be available
-3. Test memory: `store_memory` and `recall_memories` should work
+1. Test connection: `init_session` tool should be available
+2. Test memory: `store_memory` and `recall_memories` should work
+3. Verify tools appear in your client's tool list
 
 ## Troubleshooting
 
