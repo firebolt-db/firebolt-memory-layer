@@ -22,38 +22,73 @@ An intelligent, persistent memory system for LLM agents using local Firebolt Cor
 
 ---
 
-## Quick Start (Recommended)
+## Getting Started
 
-**Multi-Platform Support:** FML works with Cursor IDE, Claude Code, Antigravity Codes, Google Gemini, and any MCP-compatible client. See the [Platform Setup Guide](fml/fml-server/docs/MCP_PLATFORM_SETUP.md) for platform-specific instructions.
+### Prerequisites
 
-For the fastest setup, use the bootstrap script after cloning:
+**Required services** (must be running before setup):
+
+1. **Firebolt Core** - Local database server
+   ```bash
+   # Install: bash <(curl -s https://get-core.firebolt.io/)
+   # Verify running:
+   curl http://localhost:3473/?output_format=TabSeparated -d "SELECT 1"
+   ```
+
+2. **Ollama** - Local LLM for embeddings and classification
+   ```bash
+   # Install: brew install ollama
+   # Start: ollama serve
+   # Pull models: ollama pull llama3:8b nomic-embed-text
+   ```
+
+### Installation
 
 ```bash
-# Clone the repository
 git clone git@github.com:firebolt-db/firebolt-memory-layer.git
-cd firebolt-memory-layer
-
-# Ensure Firebolt Core and Ollama are running first (see Prerequisites below)
-
-# Run the bootstrap script - does everything automatically
-cd fml/fml-server
+cd firebolt-memory-layer/fml/fml-server
 ./scripts/bootstrap.sh
 ```
 
-The bootstrap script will:
-- Set up Python virtual environment and dependencies
-- Create database schema and tables
-- **Seed core memories** (security rules, workflows, troubleshooting guides)
-- Configure Cursor IDE with FML rules and MCP settings
-- Set up pre-commit security hooks
+The bootstrap script sets up everything automatically. **Restart Cursor** (Cmd+Q) after completion.
 
-After bootstrap completes, **restart your MCP client** (Cursor IDE: Cmd+Q, Claude Code: quit and reopen, Gemini CLI: restart) and start chatting!
+### Cursor IDE
 
-**💡 Tip:** For heavy usage, start the monitoring dashboard (see Dashboard section below) to track performance and troubleshoot issues in real-time.
+**⚠️ Prerequisites Required:** Before adding FML to Cursor, ensure Firebolt Core and Ollama are running (see Prerequisites above). The MCP server needs these services to function.
+
+**Add to Cursor:**
+
+1. **Run the bootstrap script** (if you haven't already):
+   ```bash
+   cd firebolt-memory-layer/fml/fml-server
+   ./scripts/bootstrap.sh
+   ```
+   This automatically configures Cursor for you.
+
+2. **Or manually configure** by editing `~/.cursor/mcp.json`:
+   ```json
+   {
+     "mcpServers": {
+       "fml": {
+         "command": "/FULL/PATH/TO/firebolt-memory-layer/fml/fml-server/.venv/bin/python",
+         "args": ["-m", "src.server"],
+         "cwd": "/FULL/PATH/TO/firebolt-memory-layer/fml/fml-server",
+         "env": {
+           "PYTHONPATH": "/FULL/PATH/TO/firebolt-memory-layer/fml/fml-server"
+         }
+       }
+     }
+   }
+   ```
+   Replace `/FULL/PATH/TO/` with your actual repository path.
+
+3. **Restart Cursor** (Cmd+Q) to activate FML.
+
+> **Other MCP Clients:** See [Platform Setup Guide](fml/fml-server/docs/MCP_PLATFORM_SETUP.md) for Claude Code, Google Gemini, and others.
 
 ---
 
-## Manual Setup Guide
+## Manual Setup Guide (Detailed)
 
 If you prefer manual setup or the bootstrap script doesn't work for your environment:
 
