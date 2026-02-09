@@ -58,14 +58,20 @@ The bootstrap script sets up everything automatically. **Restart Cursor** (Cmd+Q
 
 **Add to Cursor:**
 
-1. **Run the bootstrap script** (if you haven't already):
+[![Add to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](cursor://anysphere.cursor-deeplink/settings?tab=mcp)
+
+> **Note:** Click the button above to open Cursor's MCP settings. Then follow the steps below to configure FML.
+
+**Setup Steps:**
+
+1. **Run the bootstrap script** (recommended - automatically configures Cursor):
    ```bash
    cd firebolt-memory-layer/fml/fml-server
    ./scripts/bootstrap.sh
    ```
    This automatically configures Cursor for you.
 
-2. **Or manually configure** by editing `~/.cursor/mcp.json`:
+2. **Or manually configure** by editing `~/.cursor/mcp.json` (or via Cursor Settings > Tools & MCP):
    ```json
    {
      "mcpServers": {
